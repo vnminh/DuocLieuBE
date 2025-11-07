@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/duoclieu-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Muc_do_quy_hiem {
+  thap
+  trung_binh
+  cao
+  rat_cao
+}
+
+model Nganh {
+  id             Int     @unique @default(autoincrement())
+  ten_khoa_hoc   String  @id
+  ten_tieng_viet String?
+  mo_ta          String?
+
+  hos            Ho[]
+
+  @@map("Nganh")
+}
+
+model Ho {
+  id                 Int     @unique @default(autoincrement())
+  ten_khoa_hoc       String  @id
+  ten_tieng_viet     String?
+  mo_ta              String?
+  ten_nganh_khoa_hoc String
+
+  nganh              Nganh   @relation(fields: [ten_nganh_khoa_hoc], references: [ten_khoa_hoc])
+  loais              Loai[]
+
+  @@map("Ho")
+}
+
+model Loai {
+  id              Int     @unique @default(autoincrement())
+  ten_khoa_hoc    String  @id
+  ten_tieng_viet  String?
+  ten_goi_khac    String?
+  ten_ho_khoa_hoc String
+
+  ho                              Ho      @relation(fields: [ten_ho_khoa_hoc], references: [ten_khoa_hoc])
+  dac_diem_sinh_hoc               Dac_diem_sinh_hoc?
+  khai_thac_va_che_bien           Khai_thac_va_che_bien?
+  hinh_anh                        Hinh_anh?
+  cong_dung_va_thanh_phan_hoa_hoc Cong_dung_va_thanh_phan_hoa_hoc[]
+  vi_tri_dia_li                   Vi_tri_dia_li[]
+
+  @@map("Loai")
+}
+
+model Dac_diem_sinh_hoc {
+  id                  Int             @id @default(autoincrement())
+  ten_loai_khoa_hoc   String          @unique
+  mo_ta               String?
+  dang_song           String?
+  id_vung_phan_bo     Int?
+  tru_luong           String?
+  muc_do_quy_hiem     Muc_do_quy_hiem
+  phuong_an_bao_ton   String?
+
+  loai                Loai            @relation(fields: [ten_loai_khoa_hoc], references: [ten_khoa_hoc])
+  vung_phan_bo        Vung_phan_bo?   @relation(fields: [id_vung_phan_bo], references: [id])
+
+  @@map("Dac_diem_sinh_hoc")
+}
+
+model Cong_dung_va_thanh_phan_hoa_hoc {
+  id                  Int             @id @default(autoincrement())
+  ten_loai_khoa_hoc   String
+  bo_phan_su_dung     String?
+  cong_dung           String?
+  bai_thuoc           String?
+  tac_dung_duoc_ly    String?
+
+  loai                Loai            @relation(fields: [ten_loai_khoa_hoc], references: [ten_khoa_hoc])
+
+  @@map("Cong_dung_va_thanh_phan_hoa_hoc")
+}
+
+model Khai_thac_va_che_bien {
+  id                           Int             @id @default(autoincrement())
+  ten_loai_khoa_hoc            String          @unique
+  chi_tiet_ky_thuat            String?
+  hien_trang_gay_trong_phat_trien String?
+  ky_thuat_trong_cham_soc_thu_hoach String?
+
+  loai                Loai            @relation(fields: [ten_loai_khoa_hoc], references: [ten_khoa_hoc])
+
+  @@map("Khai_thac_va_che_bien")
+}
+
+model Hinh_anh {
+  id                Int             @id @default(autoincrement())
+  ten_loai_khoa_hoc String          @unique
+  collection_uri    String?
+
+  loai              Loai            @relation(fields: [ten_loai_khoa_hoc], references: [ten_khoa_hoc])
+
+  @@map("Hinh_anh")
+}
+
+model Vi_tri_dia_li {
+  id                Int             @id @default(autoincrement())
+  ten_loai_khoa_hoc String
+  kinh_do           Float
+  vi_do             Float
+
+  loai              Loai            @relation(fields: [ten_loai_khoa_hoc], references: [ten_khoa_hoc])
+
+  @@map("Vi_tri_dia_li")
+}
+
+model Vung_phan_bo {
+  id                      Int             @id @default(autoincrement())
+  ten_dia_phan_hanh_chinh String
+  danh_sach_diem_bien     String?
+
+  dac_diem_sinh_hoc       Dac_diem_sinh_hoc[]
+
+  @@map("Vung_phan_bo")
+}

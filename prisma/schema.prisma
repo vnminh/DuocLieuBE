@@ -15,10 +15,10 @@ datasource db {
 }
 
 enum Muc_do_quy_hiem {
-  thap
-  trung_binh
-  cao
-  rat_cao
+  THAP
+  TRUNG_BINH
+  CAO
+  RAT_CAO
 }
 
 model Nganh {
@@ -26,6 +26,8 @@ model Nganh {
   ten_khoa_hoc   String  @id
   ten_tieng_viet String?
   mo_ta          String?
+  created_at     DateTime @default(now()) @db.Timestamp(6)
+  updated_at     DateTime @default(now()) @db.Timestamp(6)
 
   hos            Ho[]
 
@@ -38,6 +40,8 @@ model Ho {
   ten_tieng_viet     String?
   mo_ta              String?
   ten_nganh_khoa_hoc String
+  created_at         DateTime @default(now()) @db.Timestamp(6)
+  updated_at         DateTime @default(now()) @db.Timestamp(6)
 
   nganh              Nganh   @relation(fields: [ten_nganh_khoa_hoc], references: [ten_khoa_hoc])
   loais              Loai[]
@@ -51,6 +55,8 @@ model Loai {
   ten_tieng_viet  String?
   ten_goi_khac    String?
   ten_ho_khoa_hoc String
+  created_at      DateTime @default(now()) @db.Timestamp(6)
+  updated_at      DateTime @default(now()) @db.Timestamp(6)
 
   ho                              Ho      @relation(fields: [ten_ho_khoa_hoc], references: [ten_khoa_hoc])
   dac_diem_sinh_hoc               Dac_diem_sinh_hoc?
@@ -71,6 +77,8 @@ model Dac_diem_sinh_hoc {
   tru_luong           String?
   muc_do_quy_hiem     Muc_do_quy_hiem
   phuong_an_bao_ton   String?
+  created_at          DateTime @default(now()) @db.Timestamp(6)
+  updated_at          DateTime @default(now()) @db.Timestamp(6)
 
   loai                Loai            @relation(fields: [ten_loai_khoa_hoc], references: [ten_khoa_hoc])
   vung_phan_bo        Vung_phan_bo?   @relation(fields: [id_vung_phan_bo], references: [id])
@@ -85,6 +93,8 @@ model Cong_dung_va_thanh_phan_hoa_hoc {
   cong_dung           String?
   bai_thuoc           String?
   tac_dung_duoc_ly    String?
+  created_at          DateTime @default(now()) @db.Timestamp(6)
+  updated_at          DateTime @default(now()) @db.Timestamp(6)
 
   loai                Loai            @relation(fields: [ten_loai_khoa_hoc], references: [ten_khoa_hoc])
 
@@ -92,13 +102,15 @@ model Cong_dung_va_thanh_phan_hoa_hoc {
 }
 
 model Khai_thac_va_che_bien {
-  id                           Int             @id @default(autoincrement())
-  ten_loai_khoa_hoc            String          @unique
-  chi_tiet_ky_thuat            String?
-  hien_trang_gay_trong_phat_trien String?
+  id                                Int             @id @default(autoincrement())
+  ten_loai_khoa_hoc                 String          @unique
+  chi_tiet_ky_thuat                 String?
+  hien_trang_gay_trong_phat_trien   String?
   ky_thuat_trong_cham_soc_thu_hoach String?
+  created_at                        DateTime @default(now()) @db.Timestamp(6)
+  updated_at                        DateTime @default(now()) @db.Timestamp(6)
 
-  loai                Loai            @relation(fields: [ten_loai_khoa_hoc], references: [ten_khoa_hoc])
+  loai                              Loai            @relation(fields: [ten_loai_khoa_hoc], references: [ten_khoa_hoc])
 
   @@map("Khai_thac_va_che_bien")
 }
@@ -107,6 +119,8 @@ model Hinh_anh {
   id                Int             @id @default(autoincrement())
   ten_loai_khoa_hoc String          @unique
   collection_uri    String?
+  created_at        DateTime @default(now()) @db.Timestamp(6)
+  updated_at        DateTime @default(now()) @db.Timestamp(6)
 
   loai              Loai            @relation(fields: [ten_loai_khoa_hoc], references: [ten_khoa_hoc])
 
@@ -118,6 +132,8 @@ model Vi_tri_dia_li {
   ten_loai_khoa_hoc String
   kinh_do           Float
   vi_do             Float
+  created_at        DateTime @default(now()) @db.Timestamp(6)
+  updated_at        DateTime @default(now()) @db.Timestamp(6)
 
   loai              Loai            @relation(fields: [ten_loai_khoa_hoc], references: [ten_khoa_hoc])
 
@@ -128,8 +144,117 @@ model Vung_phan_bo {
   id                      Int             @id @default(autoincrement())
   ten_dia_phan_hanh_chinh String
   danh_sach_diem_bien     String?
+  created_at              DateTime @default(now()) @db.Timestamp(6)
+  updated_at              DateTime @default(now()) @db.Timestamp(6)
 
   dac_diem_sinh_hoc       Dac_diem_sinh_hoc[]
 
   @@map("Vung_phan_bo")
+}
+
+
+/////////////////////// For user management function ///////////////////////
+
+// Enums
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+}
+
+enum VerificationPurpose {
+  PASSWORD_RESET
+  EMAIL_VERIFICATION
+}
+
+// Models
+model User {
+  id                 Int                 @id @default(autoincrement())
+  full_name          String
+  email              String              @unique
+  password           String
+  address            String?
+  date_of_birth      DateTime?           @db.Timestamp(6)
+  gender             String?
+  avatar             String?
+  status             UserStatus          @default(ACTIVE)
+  created_at         DateTime @default(now()) @db.Timestamp(6)
+  updated_at         DateTime @default(now()) @db.Timestamp(6)
+
+  // Relations
+  roles              UserRole[]
+  verification_codes VerificationCode[]
+
+  @@map("User")
+}
+
+model VerificationCode {
+  id          Int                  @id @default(autoincrement())
+  code        String               @db.VarChar(6)
+  purpose     VerificationPurpose
+  used        Boolean              @default(false)
+  user_id     Int
+  expired_at  DateTime
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  updated_at  DateTime @default(now()) @db.Timestamp(6)
+
+  // Relation
+  user        User                 @relation(fields: [user_id], references: [id])
+
+  @@map("Verification_code")
+}
+
+model Role {
+  id             Int               @id @default(autoincrement())
+  name           String
+  description    String?
+  created_at     DateTime @default(now()) @db.Timestamp(6)
+  updated_at     DateTime @default(now()) @db.Timestamp(6)
+
+  // Relations
+  users          UserRole[]
+  permissions    RolePermission[]
+
+  @@map("Role")
+}
+
+model Permission {
+  id            Int                @id @default(autoincrement())
+  name          String
+  description   String?
+  endpoint      String?
+  created_at    DateTime @default(now()) @db.Timestamp(6)
+  updated_at    DateTime @default(now()) @db.Timestamp(6)
+
+  // Relations
+  roles         RolePermission[]
+
+  @@map("Permission")
+}
+
+model UserRole {
+  id             Int     @id @default(autoincrement())
+  user_id        Int
+  role_id        Int
+  created_at     DateTime @default(now()) @db.Timestamp(6)
+  updated_at     DateTime @default(now()) @db.Timestamp(6)
+
+  // Relations
+  user      User    @relation(fields: [user_id], references: [id])
+  role      Role    @relation(fields: [role_id], references: [id])
+
+  @@map("User_Role")
+}
+
+model RolePermission {
+  id             Int          @id @default(autoincrement())
+  role_id        Int
+  permission_id  Int
+  created_at     DateTime @default(now()) @db.Timestamp(6)
+  updated_at     DateTime @default(now()) @db.Timestamp(6)
+
+  // Relations
+  role           Role         @relation(fields: [role_id], references: [id])
+  permission     Permission   @relation(fields: [permission_id], references: [id])
+
+  @@map("Role_Permission")
 }

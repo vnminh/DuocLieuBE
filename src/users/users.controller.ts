@@ -1,7 +1,6 @@
-import { Body, Controller, Inject, Param, ParseIntPipe, Patch, Post, Put } from '@nestjs/common';
+import { Body, Controller, Inject, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto, UpdateUserDto, LoginDto, ForgotPasswordDto, VerifyCodeDto } from './dto/request-users.dto';
 
 @Controller('users')
 export class UsersController {
@@ -12,8 +11,28 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
-  @Patch('user/:id')
-  async updateUserInfo(@Param('id', ParseIntPipe) user_id: number, @Body() updateUserDto: UpdateUserDto ){
+  @Post('login')
+  async login(@Body() loginDto: LoginDto){
+    return this.usersService.login(loginDto);
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto){
+    return this.usersService.forgotPassword(forgotPasswordDto)
+  }  
+  
+  @Post('verify-code')
+  async verifyCode(@Body() verifyCodeDto: VerifyCodeDto){
+    return this.usersService.verifyCode(verifyCodeDto)
+  }  
+
+
+  @Put('user/:id')
+  async update(@Param('id', ParseIntPipe) user_id: number, @Body() updateUserDto: UpdateUserDto ){
     return this.usersService.update(user_id, updateUserDto)
   }
+
+
+
+
 }

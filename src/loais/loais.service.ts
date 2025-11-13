@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { QueryBuilder } from './utils/queryBuilder';
-import { SearchLoaiDto } from './dto/search-loai.dto';
+import { SearchLoaiDto } from './dto/request-loais.dto';
 import { LoaisMapper } from './mapper/loais.mapper';
 import { 
   ResponseCreateLoaiDto, 

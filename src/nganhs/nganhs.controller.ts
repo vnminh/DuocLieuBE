@@ -12,9 +12,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { NganhsService } from './nganhs.service';
-import { CreateNganhDto } from './dto/create-nganh.dto';
-import { UpdateNganhDto } from './dto/update-nganh.dto';
-import { SearchNganhDto } from './dto/search-nganh.dto';
+import { CreateNganhDto, UpdateNganhDto, SearchNganhDto } from './dto/request-nganhs.dto';
 
 @Controller('nganhs')
 export class NganhsController {

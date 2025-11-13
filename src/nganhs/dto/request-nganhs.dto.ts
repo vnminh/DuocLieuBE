@@ -1,6 +1,18 @@
 import { Transform } from "class-transformer";
 import { IsInt, IsOptional, IsString, Min } from "class-validator";
 
+export class CreateNganhDto {
+  ten_khoa_hoc: string;
+  ten_tieng_viet?: string;
+  mo_ta?: string;
+}
+
+export class UpdateNganhDto {
+  ten_khoa_hoc?: string;
+  ten_tieng_viet?: string;
+  mo_ta?: string;
+}
+
 export class SearchNganhDto{
     @IsOptional()
     @Transform(({value})=>parseInt(value))

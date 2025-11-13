@@ -12,9 +12,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { LoaisService } from './loais.service';
-import { CreateLoaiDto } from './dto/create-loai.dto';
-import { UpdateLoaiDto } from './dto/update-loai.dto';
-import { SearchLoaiDto } from './dto/search-loai.dto';
+import { CreateLoaiDto, UpdateLoaiDto, SearchLoaiDto } from './dto/request-loais.dto';
 
 @Controller('loais')
 export class LoaisController {

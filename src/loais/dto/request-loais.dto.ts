@@ -1,6 +1,20 @@
 import { Transform } from "class-transformer";
 import { IsInt, IsOptional, IsString, Min } from "class-validator";
 
+export class CreateLoaiDto {
+  ten_khoa_hoc: string;
+  ten_tieng_viet?: string;
+  ten_goi_khac?: string;
+  ten_ho_khoa_hoc: string;
+}
+
+export class UpdateLoaiDto {
+  ten_khoa_hoc?: string;
+  ten_tieng_viet?: string;
+  ten_goi_khac?: string;
+  ten_ho_khoa_hoc?: string;
+}
+
 export class SearchLoaiDto{
     @IsOptional()
     @Transform(({value})=>parseInt(value))

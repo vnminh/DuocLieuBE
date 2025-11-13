@@ -12,9 +12,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { HosService } from './hos.service';
-import { CreateHoDto } from './dto/create-ho.dto';
-import { UpdateHoDto } from './dto/update-ho.dto';
-import { SearchHoDto } from './dto/search-ho.dto';
+import { SearchHoDto, CreateHoDto, UpdateHoDto } from './dto/request-ho.dto';
 
 @Controller('hos')
 export class HosController {

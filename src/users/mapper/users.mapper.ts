@@ -1,8 +1,16 @@
-import {User} from '@prisma/duoclieu-client'
-import { ResponseCreateUserDto } from '../dto/response-user.dto'
+import {User, VerificationCode, VerificationPurpose} from '@prisma/duoclieu-client'
+import { ResponseCreateUserDto, ResponseForgotPasswordDto, ResponseLoginDto, ResponseVerifyCodeDto } from '../dto/response-user.dto'
+import { CreateEmailResponseSuccess } from 'resend'
 export class UsersMapper{
 
     static toResponseCreateUserDto(data: User, message:string="User được tạo mới thành công"): ResponseCreateUserDto{
+        return {
+            message,
+            data
+        }
+    }
+
+    static toResponseLoginDto(data: User, message:string="User đăng nhập thành công"): ResponseLoginDto{
         return {
             message,
             data
@@ -13,6 +21,31 @@ export class UsersMapper{
         return {
             message,
             data
+        }
+    }
+
+    static toResponseForgotPasswordDto(verificationCode: VerificationCode, emailResponse: CreateEmailResponseSuccess, message:string="Email reset password được gửi thành công"): ResponseForgotPasswordDto{
+        return {
+            message,
+            data:{
+                verificationCode,
+                emailResponse,
+            }
+        }
+    }
+
+    static toResponseVerifyCodeDto(data: User, purpose: VerificationPurpose): ResponseVerifyCodeDto{
+        if (purpose===VerificationPurpose.PASSWORD_RESET){
+            return {
+                message:'Reset password thành công',
+                data
+            }
+        }
+        else{
+            return {
+                message:'Xác nhận email thành công',
+                data
+            }
         }
     }
 }

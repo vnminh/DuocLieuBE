@@ -1,4 +1,5 @@
-import { User } from '@prisma/duoclieu-client'
+import { User, VerificationCode } from '@prisma/duoclieu-client'
+import { CreateEmailResponseSuccess } from 'resend'
 
 
 export class ResponseCreateUserDto{
@@ -7,6 +8,24 @@ export class ResponseCreateUserDto{
 }
 
 export class ResponseUpdateUserDto{
+    message: string
+    data: User 
+}
+
+export class ResponseLoginDto{
+    message: string
+    data: User 
+}
+
+export class ResponseForgotPasswordDto{
+    message: string
+    data: {
+        verificationCode: VerificationCode,
+        emailResponse: CreateEmailResponseSuccess
+    }
+}
+
+export class ResponseVerifyCodeDto{
     message: string
     data: User 
 }

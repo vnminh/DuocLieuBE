@@ -1,5 +1,5 @@
 import {User, VerificationCode, VerificationPurpose} from '@prisma/duoclieu-client'
-import { ResponseAllUserDto, ResponseCreateUserDto, ResponseForgotPasswordDto, ResponseLoginDto, ResponseVerifyCodeDto } from '../dto/response-user.dto'
+import { ResponseAllUserDto, ResponseCreateUserDto, ResponseForgotPasswordDto, ResponseLoginDto, ResponseVerifyCodeDto, ResponseCreateManyUserDto } from '../dto/response-user.dto'
 import { CreateEmailResponseSuccess } from 'resend'
 export class UsersMapper{
 
@@ -59,5 +59,12 @@ export class UsersMapper{
             }
         }
         
+    }
+
+    static toResponseCreateManyUserDto(data: User[], message:string="Users được tạo mới thành công"): ResponseCreateManyUserDto{
+        return {
+            message,
+            data
+        }
     }
 }

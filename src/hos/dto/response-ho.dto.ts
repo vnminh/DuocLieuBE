@@ -24,3 +24,8 @@ export class ResponseUniqueHoDto {
     message: string
     data: Ho
 }
+
+export class ResponseCreateManyHoDto {
+    message: string
+    data: Ho[]
+}

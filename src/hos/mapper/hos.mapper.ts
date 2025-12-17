@@ -4,7 +4,8 @@ import {
   ResponseUpdateHoDto,
   ResponseSearchHoDto,
   ResponseDeleteHoDto,
-  ResponseUniqueHoDto
+  ResponseUniqueHoDto,
+  ResponseCreateManyHoDto
 } from '../dto/response-ho.dto';
 import { ResponseAllHosDto } from '../dto/response-hos.dto';
 
@@ -57,6 +58,13 @@ export class HosMapper {
         total,
         pages
       }
+    };
+  }
+
+  static toResponseCreateManyHoDto(data: Ho[], message: string = 'Họ đã được tạo thành công'): ResponseCreateManyHoDto {
+    return {
+      message,
+      data
     };
   }
 }

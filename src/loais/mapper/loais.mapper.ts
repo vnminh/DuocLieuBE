@@ -4,7 +4,8 @@ import {
   ResponseUpdateLoaiDto,
   ResponseSearchLoaiDto,
   ResponseDeleteLoaiDto,
-  ResponseUniqueLoaiDto
+  ResponseUniqueLoaiDto,
+  ResponseCreateManyLoaiDto
 } from '../dto/response-loais.dto';
 import { ResponseAllLoaisDto } from '../dto/response-loais.dto';
 
@@ -57,6 +58,13 @@ export class LoaisMapper {
         total,
         pages
       }
+    };
+  }
+
+  static toResponseCreateManyLoaiDto(data: Loai[], message: string = 'Loài đã được tạo thành công'): ResponseCreateManyLoaiDto {
+    return {
+      message,
+      data
     };
   }
 }

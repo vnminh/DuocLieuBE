@@ -6,7 +6,8 @@ import {
   ResponseCreateNganhDto, 
   ResponseUpdateNganhDto, 
   ResponseSearchNganhDto, 
-  ResponseDeleteNganhDto 
+  ResponseDeleteNganhDto,
+  ResponseCreateManyNganhDto
 } from './dto/response-nganhs.dto';
 import { ResponseAllNganhsDto } from './dto/response-nganhs.dto';
 
@@ -38,6 +39,11 @@ export class NganhsService {
       } 
     });
     return NganhsMapper.toResponseCreateNganhDto(nganh);
+  }
+
+  async createMany(items: { ten_khoa_hoc: string; ten_tieng_viet?: string; mo_ta?: string }[]): Promise<ResponseCreateManyNganhDto> {
+    const createdNganhs = await this.prisma.nganh.createManyAndReturn({ data: items });
+    return NganhsMapper.toResponseCreateManyNganhDto(createdNganhs);
   }
 
   async update(id: number, data: { ten_khoa_hoc?: string; ten_tieng_viet?: string; mo_ta?: string }): Promise<ResponseUpdateNganhDto> {

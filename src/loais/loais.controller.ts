@@ -12,7 +12,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { LoaisService } from './loais.service';
-import { CreateLoaiDto, UpdateLoaiDto, SearchLoaiDto } from './dto/request-loais.dto';
+import { CreateLoaiDto, UpdateLoaiDto, SearchLoaiDto, CreateManyLoaiDto, CreateLoaiWithDetailsDto, CreateManyLoaiWithDetailsDto } from './dto/request-loais.dto';
 
 @Controller('loais')
 export class LoaisController {
@@ -48,6 +48,21 @@ export class LoaisController {
   @Post()
   async create(@Body() createDto: CreateLoaiDto) {
     return this.loaisService.create(createDto as any);
+  }
+
+  @Post('many')
+  async createMany(@Body() createManyDto: CreateManyLoaiDto) {
+    return this.loaisService.createMany(createManyDto.data as any);
+  }
+
+  @Post('with-details')
+  async createWithDetails(@Body() createDto: CreateLoaiWithDetailsDto) {
+    return this.loaisService.createWithDetails(createDto);
+  }
+
+  @Post('many-with-details')
+  async createManyWithDetails(@Body() createManyDto: CreateManyLoaiWithDetailsDto) {
+    return this.loaisService.createManyWithDetails(createManyDto.data);
   }
 
   @Put(':id')

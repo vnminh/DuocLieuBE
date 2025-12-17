@@ -6,7 +6,8 @@ import {
   ResponseCreateHoDto, 
   ResponseUpdateHoDto, 
   ResponseSearchHoDto, 
-  ResponseDeleteHoDto 
+  ResponseDeleteHoDto,
+  ResponseCreateManyHoDto
 } from './dto/response-ho.dto';
 import { ResponseAllHosDto } from './dto/response-hos.dto';
 
@@ -59,6 +60,11 @@ export class HosService {
   async create(data: { ten_khoa_hoc: string; ten_tieng_viet?: string; mo_ta?: string; ten_nganh_khoa_hoc: string }): Promise<ResponseCreateHoDto> {
     const ho = await this.prisma.ho.create({ data });
     return HosMapper.toResponseCreateHoDto(ho);
+  }
+
+  async createMany(items: { ten_khoa_hoc: string; ten_tieng_viet?: string; mo_ta?: string; ten_nganh_khoa_hoc: string }[]): Promise<ResponseCreateManyHoDto> {
+    const createdHos = await this.prisma.ho.createManyAndReturn({ data: items });
+    return HosMapper.toResponseCreateManyHoDto(createdHos);
   }
 
   async update(id: number, data: { ten_khoa_hoc?: string; ten_tieng_viet?: string; mo_ta?: string; ten_nganh_khoa_hoc?: string }): Promise<ResponseUpdateHoDto> {

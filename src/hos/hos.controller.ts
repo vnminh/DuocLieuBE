@@ -12,7 +12,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { HosService } from './hos.service';
-import { SearchHoDto, CreateHoDto, UpdateHoDto } from './dto/request-ho.dto';
+import { SearchHoDto, CreateHoDto, UpdateHoDto, CreateManyHoDto } from './dto/request-ho.dto';
 
 @Controller('hos')
 export class HosController {
@@ -53,6 +53,11 @@ export class HosController {
   @Post()
   async create(@Body() createDto: CreateHoDto) {
     return this.hosService.create(createDto as any);
+  }
+
+  @Post('many')
+  async createMany(@Body() createManyDto: CreateManyHoDto) {
+    return this.hosService.createMany(createManyDto.data as any);
   }
 
   @Put(':id')

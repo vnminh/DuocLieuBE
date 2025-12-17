@@ -94,3 +94,7 @@ export class VerifyCodeDto{
 
     purpose: VerificationPurpose
 }
+
+export class CreateManyUserDto {
+    data: CreateUserDto[];
+}

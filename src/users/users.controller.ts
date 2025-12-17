@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Inject, Param, ParseIntPipe, Post, Put, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto, UpdateUserDto, LoginDto, ForgotPasswordDto, VerifyCodeDto } from './dto/request-users.dto';
+import { CreateUserDto, UpdateUserDto, LoginDto, ForgotPasswordDto, VerifyCodeDto, CreateManyUserDto } from './dto/request-users.dto';
 import { SearchFilterDto } from './dto/request-filters.dto';
 
 @Controller('users')
@@ -10,6 +10,11 @@ export class UsersController {
   @Post('user')
   async create(@Body() createUserDto: CreateUserDto){
     return this.usersService.create(createUserDto);
+  }
+
+  @Post('user/many')
+  async createMany(@Body() createManyUserDto: CreateManyUserDto){
+    return this.usersService.createMany(createManyUserDto.data);
   }
 
   @Post('login')

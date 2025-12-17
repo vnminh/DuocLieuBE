@@ -38,3 +38,8 @@ export class ResponseAllUserDto{
         n_pages?:number,
     }
 }
+
+export class ResponseCreateManyUserDto{
+    message: string
+    data: User[]
+}

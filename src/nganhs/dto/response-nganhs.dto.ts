@@ -25,6 +25,11 @@ export class ResponseUniqueNganhDto{
     data: Nganh
 }
 
+export class ResponseCreateManyNganhDto {
+    message: string
+    data: Nganh[]
+}
+
 export class ResponseAllNganhsDto {
     message: string;
     data: {

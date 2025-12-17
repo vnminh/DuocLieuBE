@@ -4,7 +4,7 @@ import { QueryBuilder } from './utils/queryBuilder';
 import { UserStatus, Prisma, VerificationPurpose, UserRole } from '@prisma/duoclieu-client'
 import bycrpt from 'bcrypt'
 import { UsersMapper } from './mapper/users.mapper';
-import { ResponseCreateUserDto, ResponseForgotPasswordDto, ResponseLoginDto, ResponseUpdateUserDto, ResponseVerifyCodeDto } from './dto/response-user.dto';
+import { ResponseCreateUserDto, ResponseForgotPasswordDto, ResponseLoginDto, ResponseUpdateUserDto, ResponseVerifyCodeDto, ResponseCreateManyUserDto } from './dto/response-user.dto';
 import { ForgotPasswordDto } from './dto/request-users.dto';
 import { EmailService } from '../email/email.service';
 import { VerificationHelper } from './utils/verificationHelper';
@@ -33,6 +33,23 @@ export class UsersService {
       data: new_user
     })
     return UsersMapper.toResponseCreateUserDto(newUser)
+  }
+
+  async createMany(items: {full_name: string, email: string, password:string, role:UserRole, status: UserStatus, address?: string, date_of_birth?:string, gender?:"Male"|"Female"|"Other", avatar?: string}[]): Promise<ResponseCreateManyUserDto> {
+    const hashedItems = await Promise.all(items.map(async (data) => {
+      const new_user:Prisma.UserCreateInput = {...data}
+      const hashed_pass = await bycrpt.hash(data.password, this.saltOrRound)
+      if (data.date_of_birth){
+        const parsed_date = new Date(data.date_of_birth)
+        new_user.date_of_birth=parsed_date
+      }
+      new_user.password = hashed_pass
+      return new_user
+    }))
+    const createdUsers = await this.prisma.user.createManyAndReturn({
+      data: hashedItems
+    })
+    return UsersMapper.toResponseCreateManyUserDto(createdUsers)
   }
 
   async login(data:{email: string, password:string}): Promise<ResponseLoginDto>{

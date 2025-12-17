@@ -13,6 +13,10 @@ export class UpdateNganhDto {
   mo_ta?: string;
 }
 
+export class CreateManyNganhDto {
+  data: CreateNganhDto[];
+}
+
 export class SearchNganhDto{
     @IsOptional()
     @Transform(({value})=>parseInt(value))

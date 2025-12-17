@@ -12,7 +12,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { NganhsService } from './nganhs.service';
-import { CreateNganhDto, UpdateNganhDto, SearchNganhDto } from './dto/request-nganhs.dto';
+import { CreateNganhDto, UpdateNganhDto, SearchNganhDto, CreateManyNganhDto } from './dto/request-nganhs.dto';
 
 @Controller('nganhs')
 export class NganhsController {
@@ -46,6 +46,11 @@ export class NganhsController {
   @Post()
   async create(@Body() createDto: CreateNganhDto) {
     return this.nganhsService.create(createDto as any);
+  }
+
+  @Post('many')
+  async createMany(@Body() createManyDto: CreateManyNganhDto) {
+    return this.nganhsService.createMany(createManyDto.data as any);
   }
 
   @Put(':id')

@@ -4,7 +4,8 @@ import {
   ResponseUpdateNganhDto,
   ResponseSearchNganhDto,
   ResponseDeleteNganhDto,
-  ResponseUniqueNganhDto
+  ResponseUniqueNganhDto,
+  ResponseCreateManyNganhDto
 } from '../dto/response-nganhs.dto';
 import { ResponseAllNganhsDto, ResponseNganhDto } from '../dto/response-nganhs.dto';
 
@@ -58,6 +59,13 @@ export class NganhsMapper {
         pages
       }
 
+    };
+  }
+
+  static toResponseCreateManyNganhDto(data: Nganh[], message: string = 'Ngành đã được tạo thành công'): ResponseCreateManyNganhDto {
+    return {
+      message,
+      data
     };
   }
 }

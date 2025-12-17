@@ -36,3 +36,7 @@ export class UpdateHoDto {
   mo_ta?: string;
   ten_nganh_khoa_hoc?: string;
 }
+
+export class CreateManyHoDto {
+  data: CreateHoDto[];
+}

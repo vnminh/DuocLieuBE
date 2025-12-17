@@ -25,6 +25,11 @@ export class ResponseUniqueLoaiDto {
     data: Loai
 }
 
+export class ResponseCreateManyLoaiDto {
+    message: string
+    data: Loai[]
+}
+
 export class ResponseAllLoaisDto {
     message: string;
     data: {

@@ -29,3 +29,12 @@ export class ResponseVerifyCodeDto{
     message: string
     data: User 
 }
+
+export class ResponseAllUserDto{
+    message: string
+    data: {
+        allUser: User[],
+        total: number,
+        n_pages?:number,
+    }
+}

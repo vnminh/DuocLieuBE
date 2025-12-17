@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { QueryBuilder } from './utils/queryBuilder';
 import { HosMapper } from './mapper/hos.mapper';
 import { 
@@ -8,6 +8,7 @@ import {
   ResponseSearchHoDto, 
   ResponseDeleteHoDto 
 } from './dto/response-ho.dto';
+import { ResponseAllHosDto } from './dto/response-hos.dto';
 
 @Injectable()
 export class HosService {
@@ -74,6 +75,52 @@ export class HosService {
   async remove(id: number): Promise<ResponseDeleteHoDto> {
     const ho = await this.prisma.ho.delete({ where: { id } });
     return HosMapper.toResponseDeleteHoDto(ho);
+  }
+
+  async allHos(filter: { ten_khoa_hoc?: string; ten_nganh_khoa_hoc?: string; page: number; limit: number }): Promise<ResponseAllHosDto> {
+    const where = QueryBuilder.buildQueryFilter(filter.ten_khoa_hoc, filter.ten_nganh_khoa_hoc);
+    const pagination = QueryBuilder.buildPageFilter(filter.page, filter.limit);
+    
+    const hos = await this.prisma.ho.findMany({
+      where,
+      ...pagination,
+      include: {
+        nganh: {
+          select: {
+            ten_khoa_hoc: true,
+            ten_tieng_viet: true
+          }
+        },
+        _count:{
+          select:{
+            loais:true
+          }
+        }
+      },
+      orderBy: {
+        ten_khoa_hoc: 'asc'
+      }
+    });
+
+    const total = await this.prisma.ho.count({
+      where,
+      ...pagination,
+    });
+
+    let n_pages = -1;
+    if (filter.page === 1) {
+      const allHosCount = await this.prisma.ho.count();
+      n_pages = Math.ceil(allHosCount / filter.limit);
+    }
+
+    // Map the data to include loais_count
+    const mappedData = hos.map(ho => ({
+      ...ho,
+      loais_count: ho._count.loais,
+      _count: undefined 
+    }));
+
+    return HosMapper.toResponseAllHosDto(mappedData, total, n_pages !== -1 ? n_pages : undefined);
   }
 
 }

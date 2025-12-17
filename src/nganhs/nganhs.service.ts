@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { QueryBuilder } from './utils/queryBuilder';
 import { NganhsMapper } from './mapper/nganhs.mapper';
 import { 
@@ -7,7 +7,8 @@ import {
   ResponseUpdateNganhDto, 
   ResponseSearchNganhDto, 
   ResponseDeleteNganhDto 
-} from './dto/response-nganh.dto';
+} from './dto/response-nganhs.dto';
+import { ResponseAllNganhsDto } from './dto/response-nganhs.dto';
 
 @Injectable()
 export class NganhsService {
@@ -15,19 +16,6 @@ export class NganhsService {
 
   getHello(): string {
     return 'From Nganhs Service, Hello World!';
-  }
-  async findAll(data:{page: number, limit: number, ten_khoa_hoc:string}): Promise<ResponseSearchNganhDto> {
-    console.log(data.page, data.limit, data.ten_khoa_hoc)
-    const where = QueryBuilder.buildQueryFilter(data.ten_khoa_hoc)
-    const pagination = QueryBuilder.buildPageFilter(data.page, data.limit)
-    const nganhs = await this.prisma.nganh.findMany({
-      where,
-      ...pagination,
-      orderBy:{
-        ten_khoa_hoc:'asc',
-      }
-    });
-    return NganhsMapper.toResponseSearchNganhDto(nganhs);
   }
 
   async findOneById(id: number) {
@@ -60,6 +48,45 @@ export class NganhsService {
   async remove(id: number): Promise<ResponseDeleteNganhDto> {
     const nganh = await this.prisma.nganh.delete({ where: { id } });
     return NganhsMapper.toResponseDeleteNganhDto(nganh);
+  }
+
+  async allNganhs(filter: { ten_khoa_hoc?: string; page: number; limit: number }): Promise<ResponseAllNganhsDto> {
+    const where = QueryBuilder.buildAllNganhsFilter(filter.ten_khoa_hoc);
+    const pagination = QueryBuilder.buildPageFilter(filter.page, filter.limit);
+    
+    const all = await this.prisma.nganh.findMany({
+      where,
+      ...pagination,
+      include: {
+        _count:{
+          select:{
+            hos:true
+          }
+        }
+      },
+      orderBy: {
+        ten_khoa_hoc: 'asc'
+      }
+    });
+
+    const total = await this.prisma.nganh.count({
+      where,
+      ...pagination
+    });
+
+    let n_pages = -1;
+    if (filter.page === 1) {
+      const allNganhsCount = await this.prisma.nganh.count();
+      n_pages = Math.ceil(allNganhsCount / filter.limit);
+    }
+
+    const mappedData = all.map(nganh => ({
+      ...nganh,
+      hos_count: nganh._count.hos,
+      _count: undefined
+    }));
+
+    return NganhsMapper.toResponseAllNganhsDto(mappedData, total, n_pages !== -1 ? n_pages : undefined);
   }
 
 }

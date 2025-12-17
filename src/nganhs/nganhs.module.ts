@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { NganhsController } from './nganhs.controller';
 import { NganhsService } from './nganhs.service';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Module({
   imports: [],

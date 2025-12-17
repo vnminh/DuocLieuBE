@@ -1,28 +1,43 @@
 import { Prisma } from "@prisma/duoclieu-client";
 
 export class QueryBuilder{
-    static buildQueryFilter(ten_khoa_hoc:string='', ten_nganh_khoa_hoc:string=''){
-        const where:Prisma.HoWhereInput = {}
-        const condition:any[] = []
 
-        if (ten_khoa_hoc.trim()) condition.push({
-            ten_khoa_hoc: {
-                equals:ten_khoa_hoc.trim(),
-                mode: 'insensitive' as Prisma.QueryMode,
-            }
-        })
+    static buildQueryFilter(ten_khoa_hoc?: string, ten_nganh_khoa_hoc?: string){
+        const where: Prisma.HoWhereInput = {};
+        const conditions: any[] = [];
 
-        if (ten_nganh_khoa_hoc.trim()) condition.push({
-            ten_nganh_khoa_hoc: {
-                equals:ten_nganh_khoa_hoc.trim(),
-                mode: 'insensitive' as Prisma.QueryMode,
-            }
-        })
-
-        if (condition.length){
-            where.AND = condition;
+        if (ten_khoa_hoc?.trim()) {
+            conditions.push({
+                OR: [
+                    {
+                        ten_khoa_hoc: {
+                            contains: ten_khoa_hoc.trim(),
+                            mode: 'insensitive' as Prisma.QueryMode,
+                        }
+                    },
+                    {
+                        ten_tieng_viet: {
+                            contains: ten_khoa_hoc.trim(),
+                            mode: 'insensitive' as Prisma.QueryMode,
+                        }
+                    }
+                ]
+            });
         }
-        
+
+        if (ten_nganh_khoa_hoc?.trim()) {
+            conditions.push({
+                ten_nganh_khoa_hoc: {
+                    equals: ten_nganh_khoa_hoc.trim(),
+                    mode: 'insensitive' as Prisma.QueryMode,
+                }
+            });
+        }
+
+        if (conditions.length > 0) {
+            where.AND = conditions;
+        }
+
         return where;
     }
 

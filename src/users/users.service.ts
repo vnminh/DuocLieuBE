@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { QueryBuilder } from './utils/queryBuilder';
-import { UserStatus, Prisma, VerificationPurpose } from '@prisma/duoclieu-client'
+import { UserStatus, Prisma, VerificationPurpose, UserRole } from '@prisma/duoclieu-client'
 import bycrpt from 'bcrypt'
 import { UsersMapper } from './mapper/users.mapper';
-import { ResponseCreateUserDto, ResponseForgotPasswordDto, ResponseLoginDto, ResponseUpdateUserDto } from './dto/response-user.dto';
+import { ResponseCreateUserDto, ResponseForgotPasswordDto, ResponseLoginDto, ResponseUpdateUserDto, ResponseVerifyCodeDto } from './dto/response-user.dto';
 import { ForgotPasswordDto } from './dto/request-users.dto';
 import { EmailService } from '../email/email.service';
 import { VerificationHelper } from './utils/verificationHelper';
@@ -21,7 +21,7 @@ export class UsersService {
   private readonly codeDigits = 6
   private readonly defaultPassword = bycrpt.hashSync('123456', this.saltOrRound)
 
-  async create(data: {full_name: string, email: string, password:string, role_id:number, status: UserStatus, address?: string, date_of_birth?:string, gender?:"Male"|"Female", avatar?: string}):Promise<ResponseCreateUserDto>{
+  async create(data: {full_name: string, email: string, password:string, role:UserRole, status: UserStatus, address?: string, date_of_birth?:string, gender?:"Male"|"Female"|"Other", avatar?: string}):Promise<ResponseCreateUserDto>{
     const new_user:Prisma.UserCreateInput = {...data}
     const hashed_pass = await bycrpt.hash(data.password, this.saltOrRound)
     if (data.date_of_birth){
@@ -32,12 +32,6 @@ export class UsersService {
     const newUser = await this.prisma.user.create({
       data: new_user
     })
-    const userRole = await this.prisma.userRole.create({
-      data:{
-        user_id: newUser.id,
-        role_id: data.role_id
-      }
-    })
     return UsersMapper.toResponseCreateUserDto(newUser)
   }
 
@@ -46,9 +40,6 @@ export class UsersService {
       where:{
         email:data.email,
         password: data.password,
-      },
-      include:{
-        roles:true
       }
     })
     if (!user){
@@ -57,7 +48,7 @@ export class UsersService {
     return UsersMapper.toResponseLoginDto(user)
   }
 
-  async update(user_id:number, data: {full_name?: string, email?: string, old_password?:string, new_password?:string, role_id?:number, status?: UserStatus, address?: string, date_of_birth?:string, gender?:"Male"|"Female", avatar?: string}):Promise<ResponseUpdateUserDto>{
+  async update(user_id:number, data: {full_name?: string, email?: string, old_password?:string, new_password?:string, role?:UserRole, status?: UserStatus, address?: string, date_of_birth?:string, gender?:"Male"|"Female"|"Other", avatar?: string}):Promise<ResponseUpdateUserDto>{
     const old_user_info = await this.prisma.user.findUnique({
       where:{id:user_id}
     })
@@ -68,6 +59,7 @@ export class UsersService {
       email:data.email,
       gender:data.gender,
       status:data.status,
+      role:data.role,
     }
 
     if (!old_user_info){
@@ -127,7 +119,7 @@ export class UsersService {
     return UsersMapper.toResponseForgotPasswordDto(verificationCode, emailSendResponse)
   }
 
-  async verifyCode(data:{user_id:number, verification_code:string, purpose:VerificationPurpose}){
+  async verifyCode(data:{user_id:number, verification_code:string, purpose:VerificationPurpose}): Promise<ResponseVerifyCodeDto>{
     const latest_code = await this.prisma.verificationCode.findFirst({
       where:{
         user_id:data.user_id,
@@ -158,5 +150,27 @@ export class UsersService {
     else {
       throw new UnauthorizedException('Invalid verification code')
     }
+  }
+
+  async allUsers(filter:{emailOrNamePattern?: string, status?: string, page:number, limit:number}){
+    const where = QueryBuilder.buildQueryFilter(filter.emailOrNamePattern, filter.status)
+    const pagination = QueryBuilder.buildPageFilter(filter.page, filter.limit)
+    const all = await this.prisma.user.findMany({
+      where,
+      ...pagination
+    })
+
+    const total = await this.prisma.user.count({
+      where,
+      ...pagination
+    })
+    var n_pages = -1;
+    if (filter.page===1){
+      const allUserCount = await this.prisma.user.count()
+      n_pages = Math.ceil(allUserCount/filter.limit)
+    }
+
+    return UsersMapper.toResponseAllUserDto(all, total, n_pages!==-1?n_pages:undefined)
+
   }
 }

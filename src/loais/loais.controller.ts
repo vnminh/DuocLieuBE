@@ -20,10 +20,15 @@ export class LoaisController {
 
   
   @Get('all')
-  async findAll(@Query() searchDto: SearchLoaiDto){
-    console.log(searchDto);
-    const loais = await this.loaisService.findAll(searchDto as any);
-    return loais;
+  async allLoais(
+    @Query('ten_khoa_hoc') ten_khoa_hoc?: string,
+    @Query('ten_ho_khoa_hoc') ten_ho_khoa_hoc?: string,
+    @Query('ten_nganh_khoa_hoc') ten_nganh_khoa_hoc?: string,
+    @Query('vung_phan_bo_id', ParseIntPipe) vung_phan_bo_id?: number,
+    @Query('page', ParseIntPipe) page: number = 1,
+    @Query('limit', ParseIntPipe) limit: number = 10
+  ) {
+    return this.loaisService.allLoais({ ten_khoa_hoc, ten_ho_khoa_hoc, ten_nganh_khoa_hoc, vung_phan_bo_id, page, limit });
   }
 
   @Get(':ten_khoa_hoc')

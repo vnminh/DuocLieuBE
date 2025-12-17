@@ -26,6 +26,16 @@ export class HosController {
     return hos;
   }
 
+  @Get('all-hos')
+  async allHos(
+    @Query('ten_khoa_hoc') ten_khoa_hoc?: string,
+    @Query('ten_nganh_khoa_hoc') ten_nganh_khoa_hoc?: string,
+    @Query('page', ParseIntPipe) page: number = 1,
+    @Query('limit', ParseIntPipe) limit: number = 10
+  ) {
+    return this.hosService.allHos({ ten_khoa_hoc, ten_nganh_khoa_hoc, page, limit });
+  }
+
   @Get(':ten_khoa_hoc')
   async findByTen(@Param('ten_khoa_hoc') ten_khoa_hoc: string) {
     const ho = await this.hosService.findByTenKhoaHoc(ten_khoa_hoc);

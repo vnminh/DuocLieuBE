@@ -1,6 +1,7 @@
-import { Body, Controller, Inject, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Param, ParseIntPipe, Post, Put, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto, LoginDto, ForgotPasswordDto, VerifyCodeDto } from './dto/request-users.dto';
+import { SearchFilterDto } from './dto/request-filters.dto';
 
 @Controller('users')
 export class UsersController {
@@ -32,6 +33,10 @@ export class UsersController {
     return this.usersService.update(user_id, updateUserDto)
   }
 
+  @Get('user')
+  async allUsers(@Query() filter: SearchFilterDto){
+    return this.usersService.allUsers(filter);
+  }
 
 
 

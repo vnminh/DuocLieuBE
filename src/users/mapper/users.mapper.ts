@@ -1,5 +1,5 @@
 import {User, VerificationCode, VerificationPurpose} from '@prisma/duoclieu-client'
-import { ResponseCreateUserDto, ResponseForgotPasswordDto, ResponseLoginDto, ResponseVerifyCodeDto } from '../dto/response-user.dto'
+import { ResponseAllUserDto, ResponseCreateUserDto, ResponseForgotPasswordDto, ResponseLoginDto, ResponseVerifyCodeDto } from '../dto/response-user.dto'
 import { CreateEmailResponseSuccess } from 'resend'
 export class UsersMapper{
 
@@ -47,5 +47,17 @@ export class UsersMapper{
                 data
             }
         }
+    }
+
+    static toResponseAllUserDto(data: User[], total:number, n_pages?:number, message:string='get all users successfully'): ResponseAllUserDto{
+        return {
+            message,
+            data:{
+                allUser: data,
+                total,
+                n_pages
+            }
+        }
+        
     }
 }

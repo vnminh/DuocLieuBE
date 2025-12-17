@@ -1,6 +1,6 @@
 import { Transform } from "class-transformer"
-import { IsEmail, IsInt, IsOptional, IsString } from "class-validator"
-import { UserStatus, VerificationPurpose } from "@prisma/duoclieu-client"
+import { IsEmail, IsEnum, IsInt, IsOptional, IsString } from "class-validator"
+import { UserStatus, VerificationPurpose, UserRole } from "@prisma/duoclieu-client"
 
 export class CreateUserDto{
     @IsString()
@@ -12,8 +12,8 @@ export class CreateUserDto{
     @IsString()
     password:string         
 
-    @Transform(({value})=>parseInt(value))
-    role_id: number
+    @IsEnum(UserRole)
+    role: UserRole
 
     @IsString()
     @IsOptional()
@@ -23,7 +23,7 @@ export class CreateUserDto{
     date_of_birth?:string      
     
     @IsOptional()
-    gender?:"Male"|"Female"
+    gender?:"Male"|"Female"|"Other"
     
     @IsOptional()
     avatar?:string             
@@ -48,8 +48,9 @@ export class UpdateUserDto{
     @IsOptional()
     new_password?:string         
 
-    @Transform(({value})=>parseInt(value))
-    role_id?: number
+    @IsEnum(UserRole)
+    @IsOptional()
+    role?: UserRole
 
     @IsString()
     @IsOptional()
@@ -59,7 +60,7 @@ export class UpdateUserDto{
     date_of_birth?:string      
     
     @IsOptional()
-    gender?:"Male"|"Female"
+    gender?:"Male"|"Female"|"Other"
     
     @IsOptional()
     avatar?:string             

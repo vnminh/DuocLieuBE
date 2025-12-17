@@ -19,11 +19,14 @@ export class NganhsController {
   constructor(@Inject(NganhsService) private readonly nganhsService: NganhsService) {}
 
   
-  @Get('all')
-  async findAll(@Query() searchDto: SearchNganhDto){
-    console.log(searchDto);
-    const nganhs = await this.nganhsService.findAll(searchDto as any);
-    return nganhs;
+
+  @Get('all-nganhs')
+  async allNganhs(
+    @Query('ten_khoa_hoc') ten_khoa_hoc?: string,
+    @Query('page', ParseIntPipe) page: number = 1,
+    @Query('limit', ParseIntPipe) limit: number = 10
+  ) {
+    return this.nganhsService.allNganhs({ ten_khoa_hoc, page, limit });
   }
 
   @Get(':ten_khoa_hoc')

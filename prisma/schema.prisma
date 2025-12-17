@@ -73,7 +73,6 @@ model Dac_diem_sinh_hoc {
   ten_loai_khoa_hoc   String          @unique
   mo_ta               String?
   dang_song           String?
-  id_vung_phan_bo     Int?
   tru_luong           String?
   muc_do_quy_hiem     Muc_do_quy_hiem
   phuong_an_bao_ton   String?
@@ -81,7 +80,6 @@ model Dac_diem_sinh_hoc {
   updated_at          DateTime @default(now()) @db.Timestamp(6)
 
   loai                Loai            @relation(fields: [ten_loai_khoa_hoc], references: [ten_khoa_hoc])
-  vung_phan_bo        Vung_phan_bo?   @relation(fields: [id_vung_phan_bo], references: [id])
 
   @@map("Dac_diem_sinh_hoc")
 }
@@ -132,11 +130,13 @@ model Vi_tri_dia_li {
   ten_loai_khoa_hoc String
   kinh_do           Float
   vi_do             Float
+  id_vung_phan_bo   Int?
   created_at        DateTime @default(now()) @db.Timestamp(6)
   updated_at        DateTime @default(now()) @db.Timestamp(6)
 
   loai              Loai            @relation(fields: [ten_loai_khoa_hoc], references: [ten_khoa_hoc])
-
+  vung_phan_bo      Vung_phan_bo?   @relation(fields: [id_vung_phan_bo], references: [id])
+  
   @@map("Vi_tri_dia_li")
 }
 
@@ -147,7 +147,7 @@ model Vung_phan_bo {
   created_at              DateTime @default(now()) @db.Timestamp(6)
   updated_at              DateTime @default(now()) @db.Timestamp(6)
 
-  dac_diem_sinh_hoc       Dac_diem_sinh_hoc[]
+  vi_tri_dia_li           Vi_tri_dia_li[]
 
   @@map("Vung_phan_bo")
 }
@@ -166,6 +166,12 @@ enum VerificationPurpose {
   EMAIL_VERIFICATION
 }
 
+enum UserRole {
+  USER
+  STAFF
+  ADMIN
+}
+
 // Models
 model User {
   id                 Int                 @id @default(autoincrement())
@@ -179,9 +185,9 @@ model User {
   status             UserStatus          @default(ACTIVE)
   created_at         DateTime @default(now()) @db.Timestamp(6)
   updated_at         DateTime @default(now()) @db.Timestamp(6)
+  role               UserRole
 
   // Relations
-  roles              UserRole[]
   verification_codes VerificationCode[]
 
   @@map("User")
@@ -203,25 +209,12 @@ model VerificationCode {
   @@map("Verification_code")
 }
 
-model Role {
-  id             Int               @id @default(autoincrement())
-  name           String
-  description    String?
-  created_at     DateTime @default(now()) @db.Timestamp(6)
-  updated_at     DateTime @default(now()) @db.Timestamp(6)
-
-  // Relations
-  users          UserRole[]
-  permissions    RolePermission[]
-
-  @@map("Role")
-}
 
 model Permission {
   id            Int                @id @default(autoincrement())
-  name          String
+  name          String?
   description   String?
-  endpoint      String?
+  endpoint      String
   created_at    DateTime @default(now()) @db.Timestamp(6)
   updated_at    DateTime @default(now()) @db.Timestamp(6)
 
@@ -231,29 +224,15 @@ model Permission {
   @@map("Permission")
 }
 
-model UserRole {
-  id             Int     @id @default(autoincrement())
-  user_id        Int
-  role_id        Int
-  created_at     DateTime @default(now()) @db.Timestamp(6)
-  updated_at     DateTime @default(now()) @db.Timestamp(6)
-
-  // Relations
-  user      User    @relation(fields: [user_id], references: [id])
-  role      Role    @relation(fields: [role_id], references: [id])
-
-  @@map("User_Role")
-}
 
 model RolePermission {
   id             Int          @id @default(autoincrement())
-  role_id        Int
+  role           UserRole
   permission_id  Int
   created_at     DateTime @default(now()) @db.Timestamp(6)
   updated_at     DateTime @default(now()) @db.Timestamp(6)
 
   // Relations
-  role           Role         @relation(fields: [role_id], references: [id])
   permission     Permission   @relation(fields: [permission_id], references: [id])
 
   @@map("Role_Permission")

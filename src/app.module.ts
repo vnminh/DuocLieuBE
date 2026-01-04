@@ -6,6 +6,7 @@ import { PrismaService } from './prisma/prisma.service';
 import { HosModule } from './hos/hos.module';
 import { LoaisModule } from './loais/loais.module';
 import { UsersModule } from './users/users.module';
+import { VungPhanBoModule } from './vung-phan-bo/vung-phan-bo.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { UsersModule } from './users/users.module';
     HosModule, 
     LoaisModule, 
     UsersModule,
+    VungPhanBoModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

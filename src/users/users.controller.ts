@@ -14,6 +14,7 @@ export class UsersController {
 
   @Post('user/many')
   async createMany(@Body() createManyUserDto: CreateManyUserDto){
+    console.log(createManyUserDto.data)
     return this.usersService.createMany(createManyUserDto.data);
   }
 

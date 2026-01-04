@@ -1,37 +1,33 @@
 import { Transform, Type } from "class-transformer";
 import { IsArray, IsInt, IsOptional, IsString, Min, ValidateNested } from "class-validator";
 
-export class CreateNganhDto {
+export class CreateVungPhanBoDto {
   @IsString()
-  ten_khoa_hoc: string;
+  ten_dia_phan_hanh_chinh: string;
+  
   @IsOptional()
   @IsString()
-  ten_tieng_viet?: string;
-  @IsOptional()
-  @IsString()
-  mo_ta?: string;
+  danh_sach_diem_bien?: string;
 }
 
-export class UpdateNganhDto {
+export class UpdateVungPhanBoDto {
   @IsOptional()
   @IsString()
-  ten_khoa_hoc?: string;
+  ten_dia_phan_hanh_chinh?: string;
+  
   @IsOptional()
   @IsString()
-  ten_tieng_viet?: string;
-  @IsOptional()
-  @IsString()
-  mo_ta?: string;
+  danh_sach_diem_bien?: string;
 }
 
-export class CreateManyNganhDto {
+export class CreateManyVungPhanBoDto {
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CreateNganhDto)
-  data: CreateNganhDto[];
+  @Type(() => CreateVungPhanBoDto)
+  data: CreateVungPhanBoDto[];
 }
 
-export class SearchNganhDto{
+export class SearchVungPhanBoDto{
     @IsOptional()
     @Transform(({value})=>parseInt(value))
     @IsInt()
@@ -46,5 +42,5 @@ export class SearchNganhDto{
 
     @IsOptional()
     @IsString()
-    ten_khoa_hoc: string
+    ten_dia_phan_hanh_chinh: string
 }

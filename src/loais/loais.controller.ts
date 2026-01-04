@@ -24,7 +24,7 @@ export class LoaisController {
     @Query('ten_khoa_hoc') ten_khoa_hoc?: string,
     @Query('ten_ho_khoa_hoc') ten_ho_khoa_hoc?: string,
     @Query('ten_nganh_khoa_hoc') ten_nganh_khoa_hoc?: string,
-    @Query('vung_phan_bo_id', ParseIntPipe) vung_phan_bo_id?: number,
+    @Query('vung_phan_bo_id') vung_phan_bo_id?: string,
     @Query('page', ParseIntPipe) page: number = 1,
     @Query('limit', ParseIntPipe) limit: number = 10
   ) {

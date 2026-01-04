@@ -240,8 +240,8 @@ export class LoaisService {
     return LoaisMapper.toResponseDeleteLoaiDto(loai);
   }
 
-  async allLoais(filter: { ten_khoa_hoc?: string; ten_ho_khoa_hoc?: string; ten_nganh_khoa_hoc?: string; vung_phan_bo_id?: number; page: number; limit: number }): Promise<ResponseAllLoaisDto> {
-    const where = QueryBuilder.buildQueryFilter(filter.ten_khoa_hoc, filter.ten_ho_khoa_hoc, filter.ten_nganh_khoa_hoc, filter.vung_phan_bo_id);
+  async allLoais(filter: { ten_khoa_hoc?: string; ten_ho_khoa_hoc?: string; ten_nganh_khoa_hoc?: string; vung_phan_bo_id?: string; page: number; limit: number }): Promise<ResponseAllLoaisDto> {
+    const where = QueryBuilder.buildQueryFilter(filter.ten_khoa_hoc, filter.ten_ho_khoa_hoc, filter.ten_nganh_khoa_hoc, filter.vung_phan_bo_id?Number.parseInt(filter.vung_phan_bo_id):undefined);
     const pagination = QueryBuilder.buildPageFilter(filter.page, filter.limit);
     
     const loais = await this.prisma.loai.findMany({

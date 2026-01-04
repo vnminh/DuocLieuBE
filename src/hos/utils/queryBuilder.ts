@@ -11,13 +11,13 @@ export class QueryBuilder{
                 OR: [
                     {
                         ten_khoa_hoc: {
-                            contains: ten_khoa_hoc.trim(),
+                            contains: ten_khoa_hoc?.trim(),
                             mode: 'insensitive' as Prisma.QueryMode,
                         }
                     },
                     {
                         ten_tieng_viet: {
-                            contains: ten_khoa_hoc.trim(),
+                            contains: ten_khoa_hoc?.trim(),
                             mode: 'insensitive' as Prisma.QueryMode,
                         }
                     }
@@ -28,7 +28,7 @@ export class QueryBuilder{
         if (ten_nganh_khoa_hoc?.trim()) {
             conditions.push({
                 ten_nganh_khoa_hoc: {
-                    equals: ten_nganh_khoa_hoc.trim(),
+                    equals: ten_nganh_khoa_hoc?.trim(),
                     mode: 'insensitive' as Prisma.QueryMode,
                 }
             });

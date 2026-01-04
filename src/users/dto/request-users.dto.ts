@@ -1,5 +1,5 @@
-import { Transform } from "class-transformer"
-import { IsEmail, IsEnum, IsInt, IsOptional, IsString } from "class-validator"
+import { Transform, Type } from "class-transformer"
+import { IsArray, IsEmail, IsEnum, IsInt, IsOptional, IsString, ValidateNested } from "class-validator"
 import { UserStatus, VerificationPurpose, UserRole } from "@prisma/duoclieu-client"
 
 export class CreateUserDto{
@@ -96,5 +96,8 @@ export class VerifyCodeDto{
 }
 
 export class CreateManyUserDto {
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => CreateUserDto)
     data: CreateUserDto[];
 }

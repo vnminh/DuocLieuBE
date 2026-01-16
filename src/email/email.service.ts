@@ -1,32 +1,34 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { Resend } from "resend";
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Resend } from 'resend';
 
 @Injectable()
-export class EmailService{
-    private resend: Resend
-    private fromEmail: string
+export class EmailService {
+  private resend: Resend;
+  private fromEmail: string;
 
-    constructor (){
-        this.resend = new Resend(process.env.RESEND_API_KEY)
-        this.fromEmail = process.env.FROM_EMAIL||'onboarding@resend.dev'
+  constructor() {
+    this.resend = new Resend(process.env.RESEND_API_KEY);
+    this.fromEmail = process.env.FROM_EMAIL || 'onboarding@resend.dev';
+  }
+
+  async sendResetPasswordCode(toEmail: string, code: string, name: string) {
+    const { data, error } = await this.resend.emails.send({
+      from: this.fromEmail,
+      to: toEmail,
+      subject: 'Password Reset Request',
+      html: this.getPasswordResetTemplate(code, name),
+    });
+
+    if (error) {
+      throw new InternalServerErrorException(
+        'Failed to send email. Please try again later.',
+      );
     }
 
-    async sendResetPasswordCode(toEmail: string, code: string, name: string){
-        const { data, error } = await this.resend.emails.send({
-            from: this.fromEmail,
-            to: toEmail,
-            subject: 'Password Reset Request',
-            html: this.getPasswordResetTemplate(code, name),
-        })
+    return data;
+  }
 
-        if (error) {
-            throw new InternalServerErrorException('Failed to send email. Please try again later.');
-        }
-
-        return data
-    }
-
-    private getPasswordResetTemplate(code: string, name: string): string {
+  private getPasswordResetTemplate(code: string, name: string): string {
     return `
         <!DOCTYPE html>
         <html>

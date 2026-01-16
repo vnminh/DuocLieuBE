@@ -7,6 +7,6 @@ import { PrismaService } from '../prisma/prisma.service';
   imports: [],
   controllers: [NganhsController],
   providers: [NganhsService, PrismaService],
-  exports: [NganhsService]
+  exports: [NganhsService],
 })
 export class NganhsModule {}

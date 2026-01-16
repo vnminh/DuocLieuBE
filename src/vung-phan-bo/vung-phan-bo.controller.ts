@@ -12,26 +12,67 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { VungPhanBoService } from './vung-phan-bo.service';
-import { CreateVungPhanBoDto, UpdateVungPhanBoDto, SearchVungPhanBoDto, CreateManyVungPhanBoDto } from './dto/request-vung-phan-bo.dto';
+import {
+  CreateVungPhanBoDto,
+  UpdateVungPhanBoDto,
+  SearchVungPhanBoDto,
+  CreateManyVungPhanBoDto,
+} from './dto/request-vung-phan-bo.dto';
 
 @Controller('vung-phan-bo')
 export class VungPhanBoController {
-  constructor(@Inject(VungPhanBoService) private readonly vungPhanBoService: VungPhanBoService) {}
+  constructor(
+    @Inject(VungPhanBoService)
+    private readonly vungPhanBoService: VungPhanBoService,
+  ) {}
 
-  
+  // Map-related endpoints (must be before parametric routes)
+  @Get('map-data')
+  async getMapData() {
+    return this.vungPhanBoService.getMapData();
+  }
+
+  @Get('all-loais-with-coordinates')
+  async getAllLoaisWithCoordinates() {
+    return this.vungPhanBoService.getAllLoaisWithCoordinates();
+  }
+
+  @Get(':id/loais-with-coordinates')
+  async getLoaisWithCoordinates(@Param('id', ParseIntPipe) id: number) {
+    const result =
+      await this.vungPhanBoService.getLoaisWithCoordinatesByVungPhanBo(id);
+    if (!result) throw new NotFoundException('Vung Phan Bo not found');
+    return result;
+  }
+
+  @Get(':id/detail')
+  async findOneWithRelations(@Param('id', ParseIntPipe) id: number) {
+    const vungPhanBo =
+      await this.vungPhanBoService.findOneByIdWithRelations(id);
+    if (!vungPhanBo) throw new NotFoundException('Vung Phan Bo not found');
+    return vungPhanBo;
+  }
 
   @Get('all-vung-phan-bo')
   async allVungPhanBos(
     @Query('ten_dia_phan_hanh_chinh') ten_dia_phan_hanh_chinh?: string,
     @Query('page', ParseIntPipe) page: number = 1,
-    @Query('limit', ParseIntPipe) limit: number = 10
+    @Query('limit', ParseIntPipe) limit: number = 10,
   ) {
-    return this.vungPhanBoService.allVungPhanBos({ ten_dia_phan_hanh_chinh, page, limit });
+    return this.vungPhanBoService.allVungPhanBos({
+      ten_dia_phan_hanh_chinh,
+      page,
+      limit,
+    });
   }
 
   @Get(':ten_dia_phan_hanh_chinh')
-  async findByTen(@Param('ten_dia_phan_hanh_chinh') ten_dia_phan_hanh_chinh: string) {
-    const vungPhanBo = await this.vungPhanBoService.findByTenDiaPhanHanhChinh(ten_dia_phan_hanh_chinh);
+  async findByTen(
+    @Param('ten_dia_phan_hanh_chinh') ten_dia_phan_hanh_chinh: string,
+  ) {
+    const vungPhanBo = await this.vungPhanBoService.findByTenDiaPhanHanhChinh(
+      ten_dia_phan_hanh_chinh,
+    );
     if (!vungPhanBo) throw new NotFoundException('Vung Phan Bo not found');
     return vungPhanBo;
   }
@@ -42,7 +83,7 @@ export class VungPhanBoController {
     if (!vungPhanBo) throw new NotFoundException('Vung Phan Bo not found');
     return vungPhanBo;
   }
-  
+
   @Post()
   async create(@Body() createDto: CreateVungPhanBoDto) {
     return this.vungPhanBoService.create(createDto as any);
@@ -54,7 +95,10 @@ export class VungPhanBoController {
   }
 
   @Put(':id')
-  async update(@Param('id', ParseIntPipe) id: number, @Body() updateDto: UpdateVungPhanBoDto) {
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateDto: UpdateVungPhanBoDto,
+  ) {
     return this.vungPhanBoService.update(id, updateDto as any);
   }
 

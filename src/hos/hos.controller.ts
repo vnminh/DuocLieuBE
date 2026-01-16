@@ -12,15 +12,19 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { HosService } from './hos.service';
-import { SearchHoDto, CreateHoDto, UpdateHoDto, CreateManyHoDto } from './dto/request-ho.dto';
+import {
+  SearchHoDto,
+  CreateHoDto,
+  UpdateHoDto,
+  CreateManyHoDto,
+} from './dto/request-ho.dto';
 
 @Controller('hos')
 export class HosController {
   constructor(@Inject(HosService) private readonly hosService: HosService) {}
 
-  
   @Get('all')
-  async findAll(@Query() searchDto: SearchHoDto){
+  async findAll(@Query() searchDto: SearchHoDto) {
     console.log(searchDto);
     const hos = await this.hosService.findAll(searchDto as any);
     return hos;
@@ -31,9 +35,21 @@ export class HosController {
     @Query('ten_khoa_hoc') ten_khoa_hoc?: string,
     @Query('ten_nganh_khoa_hoc') ten_nganh_khoa_hoc?: string,
     @Query('page', ParseIntPipe) page: number = 1,
-    @Query('limit', ParseIntPipe) limit: number = 10
+    @Query('limit', ParseIntPipe) limit: number = 10,
   ) {
-    return this.hosService.allHos({ ten_khoa_hoc, ten_nganh_khoa_hoc, page, limit });
+    return this.hosService.allHos({
+      ten_khoa_hoc,
+      ten_nganh_khoa_hoc,
+      page,
+      limit,
+    });
+  }
+
+  @Get(':id/detail')
+  async findOneWithRelations(@Param('id', ParseIntPipe) id: number) {
+    const ho = await this.hosService.findOneByIdWithRelations(id);
+    if (!ho) throw new NotFoundException('Ho not found');
+    return ho;
   }
 
   @Get(':ten_khoa_hoc')
@@ -49,7 +65,7 @@ export class HosController {
     if (!ho) throw new NotFoundException('Ho not found');
     return ho;
   }
-  
+
   @Post()
   async create(@Body() createDto: CreateHoDto) {
     return this.hosService.create(createDto as any);
@@ -61,7 +77,10 @@ export class HosController {
   }
 
   @Put(':id')
-  async update(@Param('id', ParseIntPipe) id: number, @Body() updateDto: UpdateHoDto) {
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateDto: UpdateHoDto,
+  ) {
     return this.hosService.update(id, updateDto as any);
   }
 

@@ -1,50 +1,49 @@
-import { Prisma } from "@prisma/duoclieu-client";
+import { Prisma } from '@prisma/duoclieu-client';
 
-export class QueryBuilder{
+export class QueryBuilder {
+  static buildQueryFilter(ten_khoa_hoc?: string, ten_nganh_khoa_hoc?: string) {
+    const where: Prisma.HoWhereInput = {};
+    const conditions: any[] = [];
 
-    static buildQueryFilter(ten_khoa_hoc?: string, ten_nganh_khoa_hoc?: string){
-        const where: Prisma.HoWhereInput = {};
-        const conditions: any[] = [];
-
-        if (ten_khoa_hoc?.trim()) {
-            conditions.push({
-                OR: [
-                    {
-                        ten_khoa_hoc: {
-                            contains: ten_khoa_hoc?.trim(),
-                            mode: 'insensitive' as Prisma.QueryMode,
-                        }
-                    },
-                    {
-                        ten_tieng_viet: {
-                            contains: ten_khoa_hoc?.trim(),
-                            mode: 'insensitive' as Prisma.QueryMode,
-                        }
-                    }
-                ]
-            });
-        }
-
-        if (ten_nganh_khoa_hoc?.trim()) {
-            conditions.push({
-                ten_nganh_khoa_hoc: {
-                    equals: ten_nganh_khoa_hoc?.trim(),
-                    mode: 'insensitive' as Prisma.QueryMode,
-                }
-            });
-        }
-
-        if (conditions.length > 0) {
-            where.AND = conditions;
-        }
-
-        return where;
+    if (ten_khoa_hoc?.trim()) {
+      conditions.push({
+        OR: [
+          {
+            ten_khoa_hoc: {
+              contains: ten_khoa_hoc?.trim(),
+              mode: 'insensitive' as Prisma.QueryMode,
+            },
+          },
+          {
+            ten_tieng_viet: {
+              contains: ten_khoa_hoc?.trim(),
+              mode: 'insensitive' as Prisma.QueryMode,
+            },
+          },
+        ],
+      });
     }
 
-    static buildPageFilter(page:number=1, limit:number=100){
-        return {
-            skip:(page-1)*limit,
-            take: limit,
-        }
+    if (ten_nganh_khoa_hoc?.trim()) {
+      conditions.push({
+        ten_nganh_khoa_hoc: {
+          equals: ten_nganh_khoa_hoc?.trim(),
+          mode: 'insensitive' as Prisma.QueryMode,
+        },
+      });
     }
+
+    if (conditions.length > 0) {
+      where.AND = conditions;
+    }
+
+    return where;
+  }
+
+  static buildPageFilter(page: number = 1, limit: number = 100) {
+    return {
+      skip: (page - 1) * limit,
+      take: limit,
+    };
+  }
 }

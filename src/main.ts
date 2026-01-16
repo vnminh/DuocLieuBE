@@ -14,10 +14,12 @@ async function bootstrap() {
   });
 
   // Global validation pipe
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    transform: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  );
 
   // Global prefix for all routes
   app.setGlobalPrefix('api/v1');

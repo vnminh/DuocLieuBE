@@ -12,21 +12,33 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { NganhsService } from './nganhs.service';
-import { CreateNganhDto, UpdateNganhDto, SearchNganhDto, CreateManyNganhDto } from './dto/request-nganhs.dto';
+import {
+  CreateNganhDto,
+  UpdateNganhDto,
+  SearchNganhDto,
+  CreateManyNganhDto,
+} from './dto/request-nganhs.dto';
 
 @Controller('nganhs')
 export class NganhsController {
-  constructor(@Inject(NganhsService) private readonly nganhsService: NganhsService) {}
-
-  
+  constructor(
+    @Inject(NganhsService) private readonly nganhsService: NganhsService,
+  ) {}
 
   @Get('all-nganhs')
   async allNganhs(
     @Query('ten_khoa_hoc') ten_khoa_hoc?: string,
     @Query('page', ParseIntPipe) page: number = 1,
-    @Query('limit', ParseIntPipe) limit: number = 10
+    @Query('limit', ParseIntPipe) limit: number = 10,
   ) {
     return this.nganhsService.allNganhs({ ten_khoa_hoc, page, limit });
+  }
+
+  @Get(':id/detail')
+  async findOneWithRelations(@Param('id', ParseIntPipe) id: number) {
+    const nganh = await this.nganhsService.findOneByIdWithRelations(id);
+    if (!nganh) throw new NotFoundException('Nganh not found');
+    return nganh;
   }
 
   @Get(':ten_khoa_hoc')
@@ -42,7 +54,7 @@ export class NganhsController {
     if (!nganh) throw new NotFoundException('Nganh not found');
     return nganh;
   }
-  
+
   @Post()
   async create(@Body() createDto: CreateNganhDto) {
     return this.nganhsService.create(createDto as any);
@@ -54,7 +66,10 @@ export class NganhsController {
   }
 
   @Put(':id')
-  async update(@Param('id', ParseIntPipe) id: number, @Body() updateDto: UpdateNganhDto) {
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateDto: UpdateNganhDto,
+  ) {
     return this.nganhsService.update(id, updateDto as any);
   }
 

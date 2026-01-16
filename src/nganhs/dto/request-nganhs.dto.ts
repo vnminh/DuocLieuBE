@@ -1,5 +1,12 @@
-import { Transform, Type } from "class-transformer";
-import { IsArray, IsInt, IsOptional, IsString, Min, ValidateNested } from "class-validator";
+import { Transform, Type } from 'class-transformer';
+import {
+  IsArray,
+  IsInt,
+  IsOptional,
+  IsString,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 
 export class CreateNganhDto {
   @IsString()
@@ -31,20 +38,20 @@ export class CreateManyNganhDto {
   data: CreateNganhDto[];
 }
 
-export class SearchNganhDto{
-    @IsOptional()
-    @Transform(({value})=>parseInt(value))
-    @IsInt()
-    @Min(1)
-    page: number;
+export class SearchNganhDto {
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  @IsInt()
+  @Min(1)
+  page: number;
 
-    @IsOptional()
-    @Transform(({value})=>parseInt(value))
-    @IsInt()
-    @Min(1)
-    limit: number;
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  @IsInt()
+  @Min(1)
+  limit: number;
 
-    @IsOptional()
-    @IsString()
-    ten_khoa_hoc: string
+  @IsOptional()
+  @IsString()
+  ten_khoa_hoc: string;
 }

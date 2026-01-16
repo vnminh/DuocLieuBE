@@ -10,14 +10,14 @@ import { VungPhanBoModule } from './vung-phan-bo/vung-phan-bo.module';
 
 @Module({
   imports: [
-    NganhsModule, 
-    HosModule, 
-    LoaisModule, 
+    NganhsModule,
+    HosModule,
+    LoaisModule,
     UsersModule,
     VungPhanBoModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
-  exports: [PrismaService]
+  exports: [PrismaService],
 })
 export class AppModule {}

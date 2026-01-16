@@ -5,43 +5,58 @@ import {
   ResponseSearchHoDto,
   ResponseDeleteHoDto,
   ResponseUniqueHoDto,
-  ResponseCreateManyHoDto
+  ResponseCreateManyHoDto,
 } from '../dto/response-ho.dto';
 import { ResponseAllHosDto } from '../dto/response-hos.dto';
 
 export class HosMapper {
-  static toResponseCreateHoDto(data: Ho, message: string = 'Họ đã được tạo thành công'): ResponseCreateHoDto {
+  static toResponseCreateHoDto(
+    data: Ho,
+    message: string = 'Họ đã được tạo thành công',
+  ): ResponseCreateHoDto {
     return {
       message,
-      data
+      data,
     };
   }
 
-  static toResponseUpdateHoDto(data: Ho, message: string = 'Họ đã được cập nhật thành công'): ResponseUpdateHoDto {
+  static toResponseUpdateHoDto(
+    data: Ho,
+    message: string = 'Họ đã được cập nhật thành công',
+  ): ResponseUpdateHoDto {
     return {
       message,
-      data
+      data,
     };
   }
 
-  static toResponseSearchHoDto(data: Ho[], message: string = 'Danh sách họ được tìm thấy'): ResponseSearchHoDto {
+  static toResponseSearchHoDto(
+    data: Ho[],
+    message: string = 'Danh sách họ được tìm thấy',
+  ): ResponseSearchHoDto {
     return {
       message,
-      data
+      data,
     };
   }
 
-  static toResponseDeleteHoDto(data: Ho, message: string = 'Họ đã được xóa thành công'): ResponseDeleteHoDto {
+  static toResponseDeleteHoDto(
+    data: Ho,
+    message: string = 'Họ đã được xóa thành công',
+  ): ResponseDeleteHoDto {
     return {
       message,
-      data
+      data,
     };
   }
 
-  static toResponseUniqueHoDto(data, message: string = 'Họ được tìm thấy'): ResponseUniqueHoDto {
+  static toResponseUniqueHoDto(
+    data,
+    message: string = 'Họ được tìm thấy',
+  ): ResponseUniqueHoDto {
     return {
       message,
-      data
+      data,
     };
   }
 
@@ -49,22 +64,25 @@ export class HosMapper {
     data: any[], // Use any[] because we need the relation data
     total: number,
     pages?: number,
-    message: string = 'Get all hos successfully'
+    message: string = 'Get all hos successfully',
   ): ResponseAllHosDto {
     return {
       message,
       data: {
         hos: data,
         total,
-        pages
-      }
+        pages,
+      },
     };
   }
 
-  static toResponseCreateManyHoDto(data: Ho[], message: string = 'Họ đã được tạo thành công'): ResponseCreateManyHoDto {
+  static toResponseCreateManyHoDto(
+    data: Ho[],
+    message: string = 'Họ đã được tạo thành công',
+  ): ResponseCreateManyHoDto {
     return {
       message,
-      data
+      data,
     };
   }
 }

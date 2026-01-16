@@ -1,5 +1,13 @@
-import { Transform, Type } from "class-transformer";
-import { IsArray, IsInt, IsNumber, IsOptional, IsString, Min, ValidateNested } from "class-validator";
+import { Transform, Type } from 'class-transformer';
+import {
+  IsArray,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 
 export class CreateLoaiDto {
   @IsOptional()
@@ -17,7 +25,6 @@ export class CreateLoaiDto {
 }
 
 export class UpdateLoaiDto {
-  
   @IsOptional()
   @IsString()
   ten_khoa_hoc?: string;
@@ -81,13 +88,13 @@ export class CreateLoaiWithDetailsDto {
   @IsArray()
   @Transform(({ value }) => {
     if (Array.isArray(value)) {
-      return value.map(v => String(v).trim());
+      return value.map((v) => String(v).trim());
     }
     if (typeof value === 'string') {
       return value
         .split(',')
-        .map(v => v.trim())
-        .filter(v => v.length > 0);
+        .map((v) => v.trim())
+        .filter((v) => v.length > 0);
     }
     return [];
   })
@@ -96,13 +103,13 @@ export class CreateLoaiWithDetailsDto {
   @IsArray()
   @Transform(({ value }) => {
     if (Array.isArray(value)) {
-      return value.map(v => String(v).trim());
+      return value.map((v) => String(v).trim());
     }
     if (typeof value === 'string') {
       return value
         .split(',')
-        .map(v => v.trim())
-        .filter(v => v.length > 0);
+        .map((v) => v.trim())
+        .filter((v) => v.length > 0);
     }
     return [];
   })
@@ -111,13 +118,13 @@ export class CreateLoaiWithDetailsDto {
   @IsArray()
   @Transform(({ value }) => {
     if (Array.isArray(value)) {
-      return value.map(v => String(v).trim());
+      return value.map((v) => String(v).trim());
     }
     if (typeof value === 'string') {
       return value
         .split(',')
-        .map(v => v.trim())
-        .filter(v => v.length > 0);
+        .map((v) => v.trim())
+        .filter((v) => v.length > 0);
     }
     return [];
   })
@@ -126,13 +133,13 @@ export class CreateLoaiWithDetailsDto {
   @IsArray()
   @Transform(({ value }) => {
     if (Array.isArray(value)) {
-      return value.map(v => String(v).trim());
+      return value.map((v) => String(v).trim());
     }
     if (typeof value === 'string') {
       return value
         .split(',')
-        .map(v => v.trim())
-        .filter(v => v.length > 0);
+        .map((v) => v.trim())
+        .filter((v) => v.length > 0);
     }
     return [];
   })
@@ -143,10 +150,10 @@ export class CreateLoaiWithDetailsDto {
   @IsArray()
   @Transform(({ value }) => {
     if (Array.isArray(value)) {
-      return value.map(v => Number(v));
+      return value.map((v) => Number(v));
     }
     if (typeof value === 'string') {
-      return value.split(',').map(v => Number(v.trim()));
+      return value.split(',').map((v) => Number(v.trim()));
     }
     return [];
   })
@@ -155,10 +162,10 @@ export class CreateLoaiWithDetailsDto {
   @IsArray()
   @Transform(({ value }) => {
     if (Array.isArray(value)) {
-      return value.map(v => Number(v));
+      return value.map((v) => Number(v));
     }
     if (typeof value === 'string') {
-      return value.split(',').map(v => Number(v.trim()));
+      return value.split(',').map((v) => Number(v.trim()));
     }
     return [];
   })
@@ -167,10 +174,10 @@ export class CreateLoaiWithDetailsDto {
   @IsArray()
   @Transform(({ value }) => {
     if (Array.isArray(value)) {
-      return value.map(v => Number(v));
+      return value.map((v) => Number(v));
     }
     if (typeof value === 'string') {
-      return value.split(',').map(v => Number(v.trim()));
+      return value.split(',').map((v) => Number(v.trim()));
     }
     return [];
   })
@@ -189,28 +196,28 @@ export class CreateManyLoaiWithDetailsDto {
   data: CreateLoaiWithDetailsDto[];
 }
 
-export class SearchLoaiDto{
+export class SearchLoaiDto {
   @IsOptional()
-  @Transform(({value})=>parseInt(value))
+  @Transform(({ value }) => parseInt(value))
   @IsInt()
   @Min(1)
   page: number;
 
   @IsOptional()
-  @Transform(({value})=>parseInt(value))
+  @Transform(({ value }) => parseInt(value))
   @IsInt()
   @Min(1)
   limit: number;
 
   @IsOptional()
   @IsString()
-  ten_khoa_hoc: string
+  ten_khoa_hoc: string;
 
   @IsOptional()
   @IsString()
-  ten_ho_khoa_hoc: string
+  ten_ho_khoa_hoc: string;
 
   @IsOptional()
   @IsString()
-  ten_nganh_khoa_hoc: string
+  ten_nganh_khoa_hoc: string;
 }

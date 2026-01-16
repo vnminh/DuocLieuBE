@@ -7,6 +7,6 @@ import { PrismaService } from '../prisma/prisma.service';
   imports: [],
   controllers: [VungPhanBoController],
   providers: [VungPhanBoService, PrismaService],
-  exports: [VungPhanBoService]
+  exports: [VungPhanBoService],
 })
 export class VungPhanBoModule {}

@@ -7,6 +7,6 @@ import { PrismaService } from '../prisma/prisma.service';
   imports: [],
   controllers: [LoaisController],
   providers: [LoaisService, PrismaService],
-  exports: [LoaisService]
+  exports: [LoaisService],
 })
 export class LoaisModule {}

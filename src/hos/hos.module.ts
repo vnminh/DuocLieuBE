@@ -7,6 +7,6 @@ import { PrismaService } from '../prisma/prisma.service';
   imports: [],
   controllers: [HosController],
   providers: [HosService, PrismaService],
-  exports: [HosService]
+  exports: [HosService],
 })
 export class HosModule {}

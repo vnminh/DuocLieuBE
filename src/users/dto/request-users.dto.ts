@@ -1,103 +1,113 @@
-import { Transform, Type } from "class-transformer"
-import { IsArray, IsEmail, IsEnum, IsInt, IsOptional, IsString, ValidateNested } from "class-validator"
-import { UserStatus, VerificationPurpose, UserRole } from "@prisma/duoclieu-client"
+import { Transform, Type } from 'class-transformer';
+import {
+  IsArray,
+  IsEmail,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+import {
+  UserStatus,
+  VerificationPurpose,
+  UserRole,
+} from '@prisma/duoclieu-client';
 
-export class CreateUserDto{
-    @IsString()
-    full_name:string
+export class CreateUserDto {
+  @IsString()
+  full_name: string;
 
-    @IsEmail()
-    email:string
-    
-    @IsString()
-    password:string         
+  @IsEmail()
+  email: string;
 
-    @IsEnum(UserRole)
-    role: UserRole
+  @IsString()
+  password: string;
 
-    @IsString()
-    @IsOptional()
-    address?:string
-    
-    @IsOptional()
-    date_of_birth?:string      
-    
-    @IsOptional()
-    gender?:"Male"|"Female"|"Other"
-    
-    @IsOptional()
-    avatar?:string             
-    
-    status:UserStatus = UserStatus.ACTIVE 
+  @IsEnum(UserRole)
+  role: UserRole;
+
+  @IsString()
+  @IsOptional()
+  address?: string;
+
+  @IsOptional()
+  date_of_birth?: string;
+
+  @IsOptional()
+  gender?: 'Male' | 'Female' | 'Other';
+
+  @IsOptional()
+  avatar?: string;
+
+  status: UserStatus = UserStatus.ACTIVE;
 }
 
-export class UpdateUserDto{
-    @IsString()
-    @IsOptional()
-    full_name?:string
+export class UpdateUserDto {
+  @IsString()
+  @IsOptional()
+  full_name?: string;
 
-    @IsEmail()
-    @IsOptional()
-    email?:string
-    
-    @IsString()
-    @IsOptional()
-    old_password?:string
+  @IsEmail()
+  @IsOptional()
+  email?: string;
 
-    @IsString()
-    @IsOptional()
-    new_password?:string         
+  @IsString()
+  @IsOptional()
+  old_password?: string;
 
-    @IsEnum(UserRole)
-    @IsOptional()
-    role?: UserRole
+  @IsString()
+  @IsOptional()
+  new_password?: string;
 
-    @IsString()
-    @IsOptional()
-    address?:string
-    
-    @IsOptional()
-    date_of_birth?:string      
-    
-    @IsOptional()
-    gender?:"Male"|"Female"|"Other"
-    
-    @IsOptional()
-    avatar?:string             
-    
+  @IsEnum(UserRole)
+  @IsOptional()
+  role?: UserRole;
 
-    @IsOptional()
-    status?:UserStatus = UserStatus.ACTIVE 
+  @IsString()
+  @IsOptional()
+  address?: string;
+
+  @IsOptional()
+  date_of_birth?: string;
+
+  @IsOptional()
+  gender?: 'Male' | 'Female' | 'Other';
+
+  @IsOptional()
+  avatar?: string;
+
+  @IsOptional()
+  status?: UserStatus = UserStatus.ACTIVE;
 }
 
-export class LoginDto{
-    @IsEmail()
-    email: string
+export class LoginDto {
+  @IsEmail()
+  email: string;
 
-    @IsString()
-    password: string
-
+  @IsString()
+  password: string;
 }
 
-export class ForgotPasswordDto{
-    @IsEmail()
-    email: string
+export class ForgotPasswordDto {
+  @IsEmail()
+  email: string;
 }
 
-export class VerifyCodeDto{
-    @Transform(({value})=>parseInt(value))
-    @IsInt()
-    user_id:number
+export class VerifyCodeDto {
+  @Transform(({ value }) => parseInt(value))
+  @IsInt()
+  user_id: number;
 
-    @IsString()
-    verification_code: string
+  @IsString()
+  verification_code: string;
 
-    purpose: VerificationPurpose
+  purpose: VerificationPurpose;
 }
 
 export class CreateManyUserDto {
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => CreateUserDto)
-    data: CreateUserDto[];
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateUserDto)
+  data: CreateUserDto[];
 }

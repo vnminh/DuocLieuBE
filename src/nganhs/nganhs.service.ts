@@ -2,12 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { QueryBuilder } from './utils/queryBuilder';
 import { NganhsMapper } from './mapper/nganhs.mapper';
-import { 
-  ResponseCreateNganhDto, 
-  ResponseUpdateNganhDto, 
-  ResponseSearchNganhDto, 
+import {
+  ResponseCreateNganhDto,
+  ResponseUpdateNganhDto,
+  ResponseSearchNganhDto,
   ResponseDeleteNganhDto,
-  ResponseCreateManyNganhDto
+  ResponseCreateManyNganhDto,
 } from './dto/response-nganhs.dto';
 import { ResponseAllNganhsDto } from './dto/response-nganhs.dto';
 
@@ -25,28 +25,84 @@ export class NganhsService {
     return NganhsMapper.toResponseUniqueNganhDto(nganh);
   }
 
+  async findOneByIdWithRelations(id: number) {
+    const nganh = await this.prisma.nganh.findUnique({
+      where: { id },
+      include: {
+        hos: {
+          select: {
+            id: true,
+            ten_khoa_hoc: true,
+            ten_tieng_viet: true,
+            mo_ta: true,
+            _count: {
+              select: {
+                loais: true,
+              },
+            },
+          },
+          orderBy: {
+            ten_khoa_hoc: 'asc',
+          },
+        },
+        _count: {
+          select: {
+            hos: true,
+          },
+        },
+      },
+    });
+    if (!nganh) return null;
+    return {
+      message: 'Nganh detail retrieved successfully',
+      data: {
+        ...nganh,
+        hos: nganh.hos.map((ho) => ({
+          ...ho,
+          loais_count: ho._count.loais,
+          _count: undefined,
+        })),
+        hos_count: nganh._count.hos,
+        _count: undefined,
+      },
+    };
+  }
+
   async findByTenKhoaHoc(ten_khoa_hoc: string) {
-    const nganh = await this.prisma.nganh.findUnique({ where: { ten_khoa_hoc } });
+    const nganh = await this.prisma.nganh.findUnique({
+      where: { ten_khoa_hoc },
+    });
     if (!nganh) return null;
     return NganhsMapper.toResponseUniqueNganhDto(nganh);
   }
 
-  async create(data: { ten_khoa_hoc: string; ten_tieng_viet?: string; mo_ta?: string }): Promise<ResponseCreateNganhDto> {
-    const nganh = await this.prisma.nganh.create({ 
-      data:{
+  async create(data: {
+    ten_khoa_hoc: string;
+    ten_tieng_viet?: string;
+    mo_ta?: string;
+  }): Promise<ResponseCreateNganhDto> {
+    const nganh = await this.prisma.nganh.create({
+      data: {
         ...data,
         updated_at: new Date(),
-      } 
+      },
     });
     return NganhsMapper.toResponseCreateNganhDto(nganh);
   }
 
-  async createMany(items: { ten_khoa_hoc: string; ten_tieng_viet?: string; mo_ta?: string }[]): Promise<ResponseCreateManyNganhDto> {
-    const createdNganhs = await this.prisma.nganh.createManyAndReturn({ data: items });
+  async createMany(
+    items: { ten_khoa_hoc: string; ten_tieng_viet?: string; mo_ta?: string }[],
+  ): Promise<ResponseCreateManyNganhDto> {
+    const createdNganhs = await this.prisma.nganh.createManyAndReturn({
+      data: items,
+    });
     return NganhsMapper.toResponseCreateManyNganhDto(createdNganhs);
   }
 
-  async update(id: number, data: { ten_khoa_hoc?: string; ten_tieng_viet?: string; mo_ta?: string }): Promise<ResponseUpdateNganhDto> {
+  async update(
+    id: number,
+    data: { ten_khoa_hoc?: string; ten_tieng_viet?: string; mo_ta?: string },
+  ): Promise<ResponseUpdateNganhDto> {
     const nganh = await this.prisma.nganh.update({ where: { id }, data });
     return NganhsMapper.toResponseUpdateNganhDto(nganh);
   }
@@ -56,28 +112,32 @@ export class NganhsService {
     return NganhsMapper.toResponseDeleteNganhDto(nganh);
   }
 
-  async allNganhs(filter: { ten_khoa_hoc?: string; page: number; limit: number }): Promise<ResponseAllNganhsDto> {
+  async allNganhs(filter: {
+    ten_khoa_hoc?: string;
+    page: number;
+    limit: number;
+  }): Promise<ResponseAllNganhsDto> {
     const where = QueryBuilder.buildAllNganhsFilter(filter.ten_khoa_hoc);
     const pagination = QueryBuilder.buildPageFilter(filter.page, filter.limit);
-    
+
     const all = await this.prisma.nganh.findMany({
       where,
       ...pagination,
       include: {
-        _count:{
-          select:{
-            hos:true
-          }
-        }
+        _count: {
+          select: {
+            hos: true,
+          },
+        },
       },
       orderBy: {
-        ten_khoa_hoc: 'asc'
-      }
+        ten_khoa_hoc: 'asc',
+      },
     });
 
     const total = await this.prisma.nganh.count({
       where,
-      ...pagination
+      ...pagination,
     });
 
     let n_pages = -1;
@@ -86,13 +146,16 @@ export class NganhsService {
       n_pages = Math.ceil(allNganhsCount / filter.limit);
     }
 
-    const mappedData = all.map(nganh => ({
+    const mappedData = all.map((nganh) => ({
       ...nganh,
       hos_count: nganh._count.hos,
-      _count: undefined
+      _count: undefined,
     }));
 
-    return NganhsMapper.toResponseAllNganhsDto(mappedData, total, n_pages !== -1 ? n_pages : undefined);
+    return NganhsMapper.toResponseAllNganhsDto(
+      mappedData,
+      total,
+      n_pages !== -1 ? n_pages : undefined,
+    );
   }
-
 }

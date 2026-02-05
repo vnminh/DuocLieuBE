@@ -92,7 +92,7 @@ export class CreateLoaiWithDetailsDto {
     }
     if (typeof value === 'string') {
       return value
-        .split(',')
+        .split(';')
         .map((v) => v.trim())
         .filter((v) => v.length > 0);
     }
@@ -107,7 +107,7 @@ export class CreateLoaiWithDetailsDto {
     }
     if (typeof value === 'string') {
       return value
-        .split(',')
+        .split(';')
         .map((v) => v.trim())
         .filter((v) => v.length > 0);
     }
@@ -122,7 +122,7 @@ export class CreateLoaiWithDetailsDto {
     }
     if (typeof value === 'string') {
       return value
-        .split(',')
+        .split(';')
         .map((v) => v.trim())
         .filter((v) => v.length > 0);
     }
@@ -137,7 +137,7 @@ export class CreateLoaiWithDetailsDto {
     }
     if (typeof value === 'string') {
       return value
-        .split(',')
+        .split(';')
         .map((v) => v.trim())
         .filter((v) => v.length > 0);
     }
@@ -153,7 +153,7 @@ export class CreateLoaiWithDetailsDto {
       return value.map((v) => Number(v));
     }
     if (typeof value === 'string') {
-      return value.split(',').map((v) => Number(v.trim()));
+      return value.split(';').map((v) => Number(v.trim()));
     }
     return [];
   })
@@ -165,7 +165,7 @@ export class CreateLoaiWithDetailsDto {
       return value.map((v) => Number(v));
     }
     if (typeof value === 'string') {
-      return value.split(',').map((v) => Number(v.trim()));
+      return value.split(';').map((v) => Number(v.trim()));
     }
     return [];
   })
@@ -177,7 +177,7 @@ export class CreateLoaiWithDetailsDto {
       return value.map((v) => Number(v));
     }
     if (typeof value === 'string') {
-      return value.split(',').map((v) => Number(v.trim()));
+      return value.split(';').map((v) => Number(v.trim()));
     }
     return [];
   })
@@ -187,6 +187,162 @@ export class CreateLoaiWithDetailsDto {
 
 export class CreateManyLoaiDto {
   data: CreateLoaiDto[];
+}
+
+export class UpdateLoaiWithDetailsDto {
+  // Loai 
+  @IsOptional()
+  @IsString()
+  ten_khoa_hoc?: string;
+  @IsOptional()
+  @IsString()
+  ten_tieng_viet?: string;
+  @IsOptional()
+  @IsString()
+  ten_goi_khac?: string;
+  @IsOptional()
+  @IsString()
+  ten_ho_khoa_hoc?: string;
+
+  // Dac_diem_sinh_hoc 
+  @IsOptional()
+  @IsString()
+  dac_diem_mo_ta?: string;
+  @IsOptional()
+  @IsString()
+  dang_song?: string;
+  @IsOptional()
+  @IsString()
+  tru_luong?: string;
+  @IsOptional()
+  @IsString()
+  muc_do_quy_hiem?: string;
+  @IsOptional()
+  @IsString()
+  phuong_an_bao_ton?: string;
+
+  // Khai_thac_va_che_bien 
+  @IsOptional()
+  @IsString()
+  chi_tiet_ky_thuat?: string;
+  @IsOptional()
+  @IsString()
+  hien_trang_gay_trong_phat_trien?: string;
+  @IsOptional()
+  @IsString()
+  ky_thuat_trong_cham_soc_thu_hoach?: string;
+
+  // Hinh_anh 
+  @IsOptional()
+  @IsString()
+  collection_uri?: string;
+
+  // Cong_dung_va_thanh_phan_hoa_hoc  (can have multiple)
+  @IsOptional()
+  @IsArray()
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) {
+      return value.map((v) => String(v).trim());
+    }
+    if (typeof value === 'string') {
+      return value
+        .split(';')
+        .map((v) => v.trim())
+        .filter((v) => v.length > 0);
+    }
+    return [];
+  })
+  @IsString({ each: true })
+  bo_phan_su_dung?: string[];
+  @IsOptional()
+  @IsArray()
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) {
+      return value.map((v) => String(v).trim());
+    }
+    if (typeof value === 'string') {
+      return value
+        .split(';')
+        .map((v) => v.trim())
+        .filter((v) => v.length > 0);
+    }
+    return [];
+  })
+  @IsString({ each: true })
+  cong_dung?: string[];
+  @IsOptional()
+  @IsArray()
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) {
+      return value.map((v) => String(v).trim());
+    }
+    if (typeof value === 'string') {
+      return value
+        .split(';')
+        .map((v) => v.trim())
+        .filter((v) => v.length > 0);
+    }
+    return [];
+  })
+  @IsString({ each: true })
+  bai_thuoc?: string[];
+  @IsOptional()
+  @IsArray()
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) {
+      return value.map((v) => String(v).trim());
+    }
+    if (typeof value === 'string') {
+      return value
+        .split(';')
+        .map((v) => v.trim())
+        .filter((v) => v.length > 0);
+    }
+    return [];
+  })
+  @IsString({ each: true })
+  tac_dung_duoc_ly?: string[];
+
+  // Vi_tri_dia_li (can have multiple)
+  @IsOptional()
+  @IsArray()
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) {
+      return value.map((v) => Number(v));
+    }
+    if (typeof value === 'string') {
+      return value.split(';').map((v) => Number(v.trim()));
+    }
+    return [];
+  })
+  @IsNumber({}, { each: true })
+  kinh_do?: number[];
+  @IsOptional()
+  @IsArray()
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) {
+      return value.map((v) => Number(v));
+    }
+    if (typeof value === 'string') {
+      return value.split(';').map((v) => Number(v.trim()));
+    }
+    return [];
+  })
+  @IsNumber({}, { each: true })
+  vi_do?: number[];
+  @IsOptional()
+  @IsArray()
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) {
+      return value.map((v) => Number(v));
+    }
+    if (typeof value === 'string') {
+      return value.split(';').map((v) => Number(v.trim()));
+    }
+    return [];
+  })
+  @IsNumber({}, { each: true })
+  id_vung_phan_bo?: number[];
 }
 
 export class CreateManyLoaiWithDetailsDto {

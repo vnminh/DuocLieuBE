@@ -10,15 +10,19 @@ import {
   Query,
   ParseIntPipe,
   NotFoundException,
+  Res,
+  StreamableFile,
 } from '@nestjs/common';
+import type { Response } from 'express';
+import { createReadStream } from 'fs';
 import { LoaisService } from './loais.service';
 import {
   CreateLoaiDto,
-  UpdateLoaiDto,
   SearchLoaiDto,
   CreateManyLoaiDto,
   CreateLoaiWithDetailsDto,
   CreateManyLoaiWithDetailsDto,
+  UpdateLoaiWithDetailsDto,
 } from './dto/request-loais.dto';
 
 @Controller('loais')
@@ -51,6 +55,32 @@ export class LoaisController {
     const loai = await this.loaisService.findOneById(id);
     if (!loai) throw new NotFoundException('Loai not found');
     return loai;
+  }
+
+  @Get(':id/images/count')
+  async getImageCount(@Param('id', ParseIntPipe) id: number) {
+    return this.loaisService.getImageCount(id);
+  }
+
+  @Get(':id/images/:index')
+  async getImageByIndex(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('index', ParseIntPipe) index: number,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<StreamableFile> {
+    const result = await this.loaisService.getImageByIndex(id, index);
+    
+    if (!result) {
+      throw new NotFoundException('Image not found');
+    }
+
+    const file = createReadStream(result.filePath);
+    res.set({
+      'Content-Type': result.mimeType,
+      'Cache-Control': 'public, max-age=31536000',
+    });
+
+    return new StreamableFile(file);
   }
 
   @Get(':ten_khoa_hoc')
@@ -92,9 +122,9 @@ export class LoaisController {
   @Put(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateDto: UpdateLoaiDto,
+    @Body() updateDto: UpdateLoaiWithDetailsDto,
   ) {
-    return this.loaisService.update(id, updateDto as any);
+    return this.loaisService.updateWithDetails(id, updateDto);
   }
 
   @Delete(':id')

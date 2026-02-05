@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { QueryBuilder } from './utils/queryBuilder';
 import {
   SearchLoaiDto,
   CreateLoaiWithDetailsDto,
+  UpdateLoaiWithDetailsDto,
 } from './dto/request-loais.dto';
 import { LoaisMapper } from './mapper/loais.mapper';
 import {
@@ -12,9 +13,12 @@ import {
   ResponseSearchLoaiDto,
   ResponseDeleteLoaiDto,
   ResponseCreateManyLoaiDto,
+  ResponseImageCountDto,
 } from './dto/response-loais.dto';
 import { ResponseAllLoaisDto } from './dto/response-loais.dto';
 import { Muc_do_quy_hiem } from '@prisma/duoclieu-client';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class LoaisService {
@@ -275,6 +279,166 @@ export class LoaisService {
     return LoaisMapper.toResponseUpdateLoaiDto(loai);
   }
 
+  async updateWithDetails(
+    id: number,
+    data: UpdateLoaiWithDetailsDto,
+  ): Promise<ResponseUpdateLoaiDto> {
+    const {
+      ten_khoa_hoc,
+      ten_tieng_viet,
+      ten_goi_khac,
+      ten_ho_khoa_hoc,
+      dac_diem_mo_ta,
+      dang_song,
+      tru_luong,
+      muc_do_quy_hiem,
+      phuong_an_bao_ton,
+      chi_tiet_ky_thuat,
+      hien_trang_gay_trong_phat_trien,
+      ky_thuat_trong_cham_soc_thu_hoach,
+      collection_uri,
+      bo_phan_su_dung,
+      cong_dung,
+      bai_thuoc,
+      tac_dung_duoc_ly,
+      kinh_do,
+      vi_do,
+      id_vung_phan_bo,
+    } = data;
+
+    // Update loai basic fields
+    const loaiUpdateData: any = {
+      updated_at: new Date(),
+    };
+    if (ten_khoa_hoc !== undefined) loaiUpdateData.ten_khoa_hoc = ten_khoa_hoc;
+    if (ten_tieng_viet !== undefined) loaiUpdateData.ten_tieng_viet = ten_tieng_viet;
+    if (ten_goi_khac !== undefined) loaiUpdateData.ten_goi_khac = ten_goi_khac;
+    if (ten_ho_khoa_hoc !== undefined) loaiUpdateData.ten_ho_khoa_hoc = ten_ho_khoa_hoc;
+
+    // Update Dac_diem_sinh_hoc (upsert)
+    const hasDacDiem = dac_diem_mo_ta !== undefined || dang_song !== undefined || 
+      tru_luong !== undefined || muc_do_quy_hiem !== undefined || phuong_an_bao_ton !== undefined;
+    
+    if (hasDacDiem) {
+      await this.prisma.dac_diem_sinh_hoc.upsert({
+        where: { ten_loai_khoa_hoc: ten_khoa_hoc  },
+        create: {
+          ten_loai_khoa_hoc: ten_khoa_hoc||'',
+          mo_ta: dac_diem_mo_ta,
+          dang_song,
+          tru_luong,
+          muc_do_quy_hiem: (muc_do_quy_hiem as Muc_do_quy_hiem) || 'THAP',
+          phuong_an_bao_ton,
+        },
+        update: {
+          ...(dac_diem_mo_ta !== undefined && { mo_ta: dac_diem_mo_ta }),
+          ...(dang_song !== undefined && { dang_song }),
+          ...(tru_luong !== undefined && { tru_luong }),
+          ...(muc_do_quy_hiem !== undefined && { muc_do_quy_hiem: muc_do_quy_hiem as Muc_do_quy_hiem }),
+          ...(phuong_an_bao_ton !== undefined && { phuong_an_bao_ton }),
+        },
+      });
+    }
+
+    // Update Khai_thac_va_che_bien (upsert)
+    const hasKhaiThac = chi_tiet_ky_thuat !== undefined || 
+      hien_trang_gay_trong_phat_trien !== undefined || 
+      ky_thuat_trong_cham_soc_thu_hoach !== undefined;
+    
+    if (hasKhaiThac) {
+      await this.prisma.khai_thac_va_che_bien.upsert({
+        where: { ten_loai_khoa_hoc: ten_khoa_hoc },
+        create: {
+          ten_loai_khoa_hoc: ten_khoa_hoc||'',
+          chi_tiet_ky_thuat,
+          hien_trang_gay_trong_phat_trien,
+          ky_thuat_trong_cham_soc_thu_hoach,
+        },
+        update: {
+          ...(chi_tiet_ky_thuat !== undefined && { chi_tiet_ky_thuat }),
+          ...(hien_trang_gay_trong_phat_trien !== undefined && { hien_trang_gay_trong_phat_trien }),
+          ...(ky_thuat_trong_cham_soc_thu_hoach !== undefined && { ky_thuat_trong_cham_soc_thu_hoach }),
+        },
+      });
+    }
+
+    // Update Hinh_anh (upsert)
+    if (collection_uri !== undefined) {
+      await this.prisma.hinh_anh.upsert({
+        where: { ten_loai_khoa_hoc: ten_khoa_hoc },
+        create: {
+          ten_loai_khoa_hoc: ten_khoa_hoc||'',
+          collection_uri,
+        },
+        update: {
+          collection_uri,
+        },
+      });
+    }
+
+    // Update Cong_dung_va_thanh_phan_hoa_hoc (delete all and recreate)
+    const hasCongDung = bo_phan_su_dung !== undefined || cong_dung !== undefined || 
+      bai_thuoc !== undefined || tac_dung_duoc_ly !== undefined;
+    
+    if (hasCongDung) {
+      await this.prisma.cong_dung_va_thanh_phan_hoa_hoc.deleteMany({
+        where: { ten_loai_khoa_hoc: ten_khoa_hoc },
+      });
+      
+      const congDungArray = this._buildCongDungArray(
+        bo_phan_su_dung,
+        cong_dung,
+        bai_thuoc,
+        tac_dung_duoc_ly,
+      );
+      
+      if (congDungArray.length > 0) {
+        await this.prisma.cong_dung_va_thanh_phan_hoa_hoc.createMany({
+          data: congDungArray.map((item) => ({
+            ten_loai_khoa_hoc: ten_khoa_hoc,
+            ...item,
+          })),
+        });
+      }
+    }
+
+    // Update Vi_tri_dia_li (delete all and recreate)
+    const hasViTri = kinh_do !== undefined || vi_do !== undefined;
+    
+    if (hasViTri) {
+      await this.prisma.vi_tri_dia_li.deleteMany({
+        where: { ten_loai_khoa_hoc: ten_khoa_hoc},
+      });
+      
+      const viTriArray = this._buildViTriArray(kinh_do, vi_do, id_vung_phan_bo);
+      
+      if (viTriArray.length > 0) {
+        await this.prisma.vi_tri_dia_li.createMany({
+          data: viTriArray.map((item) => ({
+            ten_loai_khoa_hoc: ten_khoa_hoc,
+            ...item,
+          })),
+        });
+      }
+    }
+
+    // Update the loai itself
+    const loai = await this.prisma.loai.update({
+      where: { id },
+      data: loaiUpdateData,
+      include: {
+        dac_diem_sinh_hoc: true,
+        khai_thac_va_che_bien: true,
+        hinh_anh: true,
+        cong_dung_va_thanh_phan_hoa_hoc: true,
+        vi_tri_dia_li: { include: { vung_phan_bo: true } },
+        ho: { include: { nganh: true } },
+      },
+    });
+
+    return LoaisMapper.toResponseUpdateLoaiDto(loai);
+  }
+
   async remove(id: number): Promise<ResponseDeleteLoaiDto> {
     const loai = await this.prisma.loai.delete({ where: { id } });
     return LoaisMapper.toResponseDeleteLoaiDto(loai);
@@ -345,5 +509,126 @@ export class LoaisService {
       total,
       n_pages !== -1 ? n_pages : undefined,
     );
+  }
+
+  /**
+   * Get the count of images in a folder based on collection_uri
+   */
+  async getImageCount(id: number): Promise<ResponseImageCountDto> {
+    const loai = await this.prisma.loai.findUnique({
+      where: { id },
+      include: { hinh_anh: true },
+    });
+
+    if (!loai) {
+      throw new NotFoundException('Loai not found');
+    }
+
+    const collectionUri = loai.hinh_anh?.collection_uri;
+    if (!collectionUri) {
+      return {
+        message: 'No image collection found',
+        data: {
+          count: 0,
+          collection_uri: '',
+        },
+      };
+    }
+
+    try {
+      // collection_uri is expected to be a folder path
+      const folderPath = path.resolve(collectionUri);
+      
+      if (!fs.existsSync(folderPath)) {
+        return {
+          message: 'Image folder not found',
+          data: {
+            count: 0,
+            collection_uri: collectionUri,
+          },
+        };
+      }
+
+      const files = fs.readdirSync(folderPath);
+      // Filter for image files
+      const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
+      const imageFiles = files.filter(file => 
+        imageExtensions.includes(path.extname(file).toLowerCase())
+      );
+
+      return {
+        message: 'Image count retrieved successfully',
+        data: {
+          count: imageFiles.length,
+          collection_uri: collectionUri,
+        },
+      };
+    } catch (error) {
+      return {
+        message: 'Error reading image folder',
+        data: {
+          count: 0,
+          collection_uri: collectionUri,
+        },
+      };
+    }
+  }
+
+  /**
+   * Get a specific image file path by index
+   */
+  async getImageByIndex(id: number, index: number): Promise<{ filePath: string; mimeType: string } | null> {
+    const loai = await this.prisma.loai.findUnique({
+      where: { id },
+      include: { hinh_anh: true },
+    });
+
+    if (!loai) {
+      throw new NotFoundException('Loai not found');
+    }
+
+    const collectionUri = loai.hinh_anh?.collection_uri;
+    if (!collectionUri) {
+      return null;
+    }
+
+    try {
+      const folderPath = path.resolve(collectionUri);
+      
+      if (!fs.existsSync(folderPath)) {
+        return null;
+      }
+
+      const files = fs.readdirSync(folderPath);
+      const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
+      const imageFiles = files
+        .filter(file => imageExtensions.includes(path.extname(file).toLowerCase()))
+        .sort(); // Sort to ensure consistent ordering
+
+      if (index < 0 || index >= imageFiles.length) {
+        return null;
+      }
+
+      const fileName = imageFiles[index];
+      const filePath = path.join(folderPath, fileName);
+      const ext = path.extname(fileName).toLowerCase();
+      
+      const mimeTypes: Record<string, string> = {
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.gif': 'image/gif',
+        '.webp': 'image/webp',
+        '.bmp': 'image/bmp',
+        '.svg': 'image/svg+xml',
+      };
+
+      return {
+        filePath,
+        mimeType: mimeTypes[ext] || 'application/octet-stream',
+      };
+    } catch (error) {
+      return null;
+    }
   }
 }

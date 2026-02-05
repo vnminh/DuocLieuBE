@@ -10,6 +10,7 @@ import {
   ResponseLoginDto,
   ResponseVerifyCodeDto,
   ResponseCreateManyUserDto,
+  ResponseResetPasswordDto,
 } from '../dto/response-user.dto';
 import { CreateEmailResponseSuccess } from 'resend';
 export class UsersMapper {
@@ -53,6 +54,20 @@ export class UsersMapper {
       data: {
         verificationCode,
         emailResponse,
+      },
+    };
+  }
+
+  static toResponseResetPasswordDto(
+    email: string,
+    emailSent: boolean,
+    message: string = 'A new password has been sent to your email',
+  ): ResponseResetPasswordDto {
+    return {
+      message,
+      data: {
+        email,
+        emailSent,
       },
     };
   }

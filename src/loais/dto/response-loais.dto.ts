@@ -57,3 +57,11 @@ export class ResponseLoaiDto {
     };
   };
 }
+
+export class ResponseImageCountDto {
+  message: string;
+  data: {
+    count: number;
+    collection_uri: string;
+  };
+}

@@ -21,6 +21,7 @@ import {
   ResponseUpdateUserDto,
   ResponseVerifyCodeDto,
   ResponseCreateManyUserDto,
+  ResponseResetPasswordDto,
 } from './dto/response-user.dto';
 import { ForgotPasswordDto } from './dto/request-users.dto';
 import { EmailService } from '../email/email.service';
@@ -103,12 +104,17 @@ export class UsersService {
     const user = await this.prisma.user.findUnique({
       where: {
         email: data.email,
-        password: data.password,
       },
     });
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
     }
+    
+    const isPasswordValid = await bycrpt.compare(data.password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+    
     return UsersMapper.toResponseLoginDto(user);
   }
 
@@ -211,6 +217,44 @@ export class UsersService {
       verificationCode,
       emailSendResponse,
     );
+  }
+
+  async resetPassword(data: {
+    email: string;
+  }): Promise<ResponseResetPasswordDto> {
+    const user = await this.prisma.user.findUnique({
+      where: { email: data.email },
+    });
+    
+    if (!user) {
+      throw new NotFoundException('User with this email does not exist');
+    }
+
+    // Generate a random password
+    const newPassword = VerificationHelper.generateRandomPassword(12);
+    const hashedPassword = await bycrpt.hash(newPassword, this.saltOrRound);
+
+    // Update user password in database
+    await this.prisma.user.update({
+      data: {
+        password: hashedPassword,
+        updated_at: new Date(),
+      },
+      where: { id: user.id },
+    });
+
+    // Send email with new password
+    const emailSendResponse = await this.emailService.sendNewPassword(
+      data.email,
+      newPassword,
+      user.full_name,
+    );
+
+    if (!emailSendResponse) {
+      throw new BadRequestException('Failed to send new password via email');
+    }
+
+    return UsersMapper.toResponseResetPasswordDto(data.email, true);
   }
 
   async verifyCode(data: {

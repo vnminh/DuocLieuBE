@@ -24,6 +24,14 @@ export class ResponseForgotPasswordDto {
   };
 }
 
+export class ResponseResetPasswordDto {
+  message: string;
+  data: {
+    email: string;
+    emailSent: boolean;
+  };
+}
+
 export class ResponseVerifyCodeDto {
   message: string;
   data: User;

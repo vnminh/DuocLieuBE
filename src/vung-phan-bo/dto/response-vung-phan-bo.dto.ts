@@ -68,6 +68,14 @@ export class LoaiWithCoordinatesDto {
   ten_tieng_viet: string | null;
   ten_goi_khac: string | null;
   ten_ho_khoa_hoc: string;
+  ho?: {
+    ten_khoa_hoc: string;
+    ten_tieng_viet: string | null;
+    nganh?: {
+      ten_khoa_hoc: string;
+      ten_tieng_viet: string | null;
+    };
+  };
   vi_tri_dia_li: {
     id: number;
     kinh_do: number;

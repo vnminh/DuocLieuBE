@@ -14,6 +14,8 @@ import {
   ResponseDeleteLoaiDto,
   ResponseCreateManyLoaiDto,
   ResponseImageCountDto,
+  ResponseImageUploadDto,
+  ResponseImageDeleteDto,
 } from './dto/response-loais.dto';
 import { ResponseAllLoaisDto } from './dto/response-loais.dto';
 import { Muc_do_quy_hiem } from '@prisma/duoclieu-client';
@@ -22,10 +24,131 @@ import * as path from 'path';
 
 @Injectable()
 export class LoaisService {
+  private readonly uploadDir = path.join(__dirname, '..', '..', 'upload');
+
   constructor(private readonly prisma: PrismaService) {}
 
   getHello(): string {
     return 'From Loais Service, Hello World!';
+  }
+
+  /**
+   * Create upload folder for a loai's images
+   * Path: upload/{id}/
+   */
+  private createUploadFolder(id: number): string {
+    const folderPath = path.join(this.uploadDir, id.toString());
+    if (!fs.existsSync(folderPath)) {
+      fs.mkdirSync(folderPath, { recursive: true });
+    }
+    return folderPath;
+  }
+
+  /**
+   * Get the upload folder path for a loai
+   */
+  getUploadFolderPath(id: number): string {
+    return path.join(this.uploadDir, id.toString());
+  }
+
+  /**
+   * Upload a preview image for a loai
+   * Saves to upload/{id}/{next_index}.jpg and updates so_luong_anh_preview
+   */
+  async uploadPreviewImage(
+    id: number,
+    file: { buffer: Buffer; originalname: string; mimetype: string },
+  ): Promise<ResponseImageUploadDto> {
+    // Ensure upload folder exists
+    const folderPath = this.createUploadFolder(id);
+
+    // Get current image count
+    const hinhAnh = await this.prisma.hinh_anh.findFirst({
+      where: { ten_loai_khoa_hoc: (await this.prisma.loai.findUnique({ where: { id } }))?.ten_khoa_hoc },
+    });
+    const currentCount = hinhAnh?.so_luong_anh_preview ?? 0;
+    const newIndex = currentCount;
+
+    // Save the file
+    const filePath = path.join(folderPath, `${newIndex}.jpg`);
+    fs.writeFileSync(filePath, file.buffer);
+
+    // Update so_luong_anh_preview
+    const loai = await this.prisma.loai.findUnique({ where: { id } });
+    if (loai) {
+      await this.prisma.hinh_anh.upsert({
+        where: { ten_loai_khoa_hoc: loai.ten_khoa_hoc },
+        create: {
+          ten_loai_khoa_hoc: loai.ten_khoa_hoc,
+          so_luong_anh_preview: 1,
+        },
+        update: {
+          so_luong_anh_preview: currentCount + 1,
+        },
+      });
+    }
+
+    return {
+      message: 'Image uploaded successfully',
+      data: {
+        index: newIndex,
+        count: currentCount + 1,
+      },
+    };
+  }
+
+  /**
+   * Delete a preview image for a loai
+   * Removes the file and reindexes remaining images
+   */
+  async deletePreviewImage(id: number, index: number): Promise<ResponseImageDeleteDto> {
+    const folderPath = this.getUploadFolderPath(id);
+
+    // Get current image count
+    const loai = await this.prisma.loai.findUnique({ where: { id } });
+    if (!loai) {
+      throw new NotFoundException('Loai not found');
+    }
+
+    const hinhAnh = await this.prisma.hinh_anh.findFirst({
+      where: { ten_loai_khoa_hoc: loai.ten_khoa_hoc },
+    });
+    const currentCount = hinhAnh?.so_luong_anh_preview ?? 0;
+
+    if (index < 0 || index >= currentCount) {
+      throw new NotFoundException('Image not found');
+    }
+
+    // Delete the file
+    const filePath = path.join(folderPath, `${index}.jpg`);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    // Reindex remaining images (shift all images after deleted index down by 1)
+    for (let i = index + 1; i < currentCount; i++) {
+      const oldPath = path.join(folderPath, `${i}.jpg`);
+      const newPath = path.join(folderPath, `${i - 1}.jpg`);
+      if (fs.existsSync(oldPath)) {
+        fs.renameSync(oldPath, newPath);
+      }
+    }
+
+    // Update so_luong_anh_preview
+    await this.prisma.hinh_anh.update({
+      where: { ten_loai_khoa_hoc: loai.ten_khoa_hoc },
+      data: {
+        so_luong_anh_preview: Math.max(0, currentCount - 1),
+      },
+    });
+
+    return {
+      message: 'Image deleted successfully',
+      data: {
+        deletedIndex: index,
+        count: currentCount - 1,
+      },
+    };
   }
 
   async findOneById(id: number) {
@@ -117,10 +240,10 @@ export class LoaisService {
       hien_trang_gay_trong_phat_trien,
       ky_thuat_trong_cham_soc_thu_hoach,
       collection_uri,
+      so_luong_anh_preview,
       bo_phan_su_dung,
       cong_dung,
       bai_thuoc,
-      tac_dung_duoc_ly,
       kinh_do,
       vi_do,
       id_vung_phan_bo,
@@ -162,21 +285,21 @@ export class LoaisService {
           },
         }),
         // Create Hinh_anh if provided
-        ...(collection_uri && {
+        ...((collection_uri || so_luong_anh_preview !== undefined) && {
           hinh_anh: {
             create: {
               collection_uri,
+              so_luong_anh_preview: so_luong_anh_preview ?? 0,
             },
           },
         }),
         // Create Cong_dung_va_thanh_phan_hoa_hoc (array)
-        ...((bo_phan_su_dung || cong_dung || bai_thuoc || tac_dung_duoc_ly) && {
+        ...((bo_phan_su_dung || cong_dung || bai_thuoc) && {
           cong_dung_va_thanh_phan_hoa_hoc: {
             create: this._buildCongDungArray(
               bo_phan_su_dung,
               cong_dung,
               bai_thuoc,
-              tac_dung_duoc_ly,
             ),
           },
         }),
@@ -197,6 +320,9 @@ export class LoaisService {
       },
     });
 
+    // Create upload folder for images
+    this.createUploadFolder(loai.id);
+
     return LoaisMapper.toResponseCreateLoaiDto(loai);
   }
 
@@ -215,13 +341,11 @@ export class LoaisService {
     bo_phan_su_dung?: string[],
     cong_dung?: string[],
     bai_thuoc?: string[],
-    tac_dung_duoc_ly?: string[],
   ) {
     const maxLength = Math.max(
       bo_phan_su_dung?.length || 0,
       cong_dung?.length || 0,
       bai_thuoc?.length || 0,
-      tac_dung_duoc_ly?.length || 0,
     );
 
     const result: any[] = [];
@@ -230,7 +354,6 @@ export class LoaisService {
         bo_phan_su_dung: bo_phan_su_dung?.[i],
         cong_dung: cong_dung?.[i],
         bai_thuoc: bai_thuoc?.[i],
-        tac_dung_duoc_ly: tac_dung_duoc_ly?.[i],
       });
     }
     return result;
@@ -297,10 +420,10 @@ export class LoaisService {
       hien_trang_gay_trong_phat_trien,
       ky_thuat_trong_cham_soc_thu_hoach,
       collection_uri,
+      so_luong_anh_preview,
       bo_phan_su_dung,
       cong_dung,
       bai_thuoc,
-      tac_dung_duoc_ly,
       kinh_do,
       vi_do,
       id_vung_phan_bo,
@@ -363,33 +486,34 @@ export class LoaisService {
     }
 
     // Update Hinh_anh (upsert)
-    if (collection_uri !== undefined) {
+    if (collection_uri !== undefined || so_luong_anh_preview !== undefined) {
       await this.prisma.hinh_anh.upsert({
         where: { ten_loai_khoa_hoc: ten_khoa_hoc },
         create: {
           ten_loai_khoa_hoc: ten_khoa_hoc||'',
           collection_uri,
+          so_luong_anh_preview: so_luong_anh_preview ?? 0,
         },
         update: {
-          collection_uri,
+          ...(collection_uri !== undefined && { collection_uri }),
+          ...(so_luong_anh_preview !== undefined && { so_luong_anh_preview }),
         },
       });
     }
 
     // Update Cong_dung_va_thanh_phan_hoa_hoc (delete all and recreate)
-    const hasCongDung = bo_phan_su_dung !== undefined || cong_dung !== undefined || 
-      bai_thuoc !== undefined || tac_dung_duoc_ly !== undefined;
-    
+    const hasCongDung = bo_phan_su_dung !== undefined || cong_dung !== undefined ||
+      bai_thuoc !== undefined;
+
     if (hasCongDung) {
       await this.prisma.cong_dung_va_thanh_phan_hoa_hoc.deleteMany({
         where: { ten_loai_khoa_hoc: ten_khoa_hoc },
       });
-      
+
       const congDungArray = this._buildCongDungArray(
         bo_phan_su_dung,
         cong_dung,
         bai_thuoc,
-        tac_dung_duoc_ly,
       );
       
       if (congDungArray.length > 0) {

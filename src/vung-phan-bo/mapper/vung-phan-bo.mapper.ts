@@ -161,6 +161,18 @@ export class VungPhanBoMapper {
       ten_tieng_viet: loai.ten_tieng_viet,
       ten_goi_khac: loai.ten_goi_khac,
       ten_ho_khoa_hoc: loai.ten_ho_khoa_hoc,
+      ho: loai.ho
+        ? {
+            ten_khoa_hoc: loai.ho.ten_khoa_hoc,
+            ten_tieng_viet: loai.ho.ten_tieng_viet,
+            nganh: loai.ho.nganh
+              ? {
+                  ten_khoa_hoc: loai.ho.nganh.ten_khoa_hoc,
+                  ten_tieng_viet: loai.ho.nganh.ten_tieng_viet,
+                }
+              : undefined,
+          }
+        : undefined,
       vi_tri_dia_li:
         loai.vi_tri_dia_li?.map((vt: any) => ({
           id: vt.id,

@@ -90,7 +90,6 @@ model Cong_dung_va_thanh_phan_hoa_hoc {
   bo_phan_su_dung     String?
   cong_dung           String?
   bai_thuoc           String?
-  tac_dung_duoc_ly    String?
   created_at          DateTime @default(now()) @db.Timestamp(6)
   updated_at          DateTime @default(now()) @db.Timestamp(6)
 
@@ -114,13 +113,14 @@ model Khai_thac_va_che_bien {
 }
 
 model Hinh_anh {
-  id                Int             @id @default(autoincrement())
-  ten_loai_khoa_hoc String          @unique
-  collection_uri    String?
-  created_at        DateTime @default(now()) @db.Timestamp(6)
-  updated_at        DateTime @default(now()) @db.Timestamp(6)
+  id                    Int             @id @default(autoincrement())
+  ten_loai_khoa_hoc     String          @unique
+  collection_uri        String?
+  so_luong_anh_preview  Int             @default(0)
+  created_at            DateTime @default(now()) @db.Timestamp(6)
+  updated_at            DateTime @default(now()) @db.Timestamp(6)
 
-  loai              Loai            @relation(fields: [ten_loai_khoa_hoc], references: [ten_khoa_hoc])
+  loai                  Loai            @relation(fields: [ten_loai_khoa_hoc], references: [ten_khoa_hoc])
 
   @@map("Hinh_anh")
 }

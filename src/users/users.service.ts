@@ -17,6 +17,7 @@ import { UsersMapper } from './mapper/users.mapper';
 import {
   ResponseCreateUserDto,
   ResponseForgotPasswordDto,
+  ResponseGetUserDto,
   ResponseLoginDto,
   ResponseUpdateUserDto,
   ResponseVerifyCodeDto,
@@ -41,6 +42,27 @@ export class UsersService {
     '123456',
     this.saltOrRound,
   );
+
+  async findOneById(id: number): Promise<ResponseGetUserDto | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        full_name: true,
+        email: true,
+        address: true,
+        date_of_birth: true,
+        gender: true,
+        avatar: true,
+        status: true,
+        role: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+    if (!user) return null;
+    return UsersMapper.toResponseGetUserDto(user as any);
+  }
 
   async create(data: {
     full_name: string;
@@ -157,12 +179,12 @@ export class UsersService {
 
     if (data.new_password) {
       if (data.old_password) {
-        const matched_pass = bycrpt.compare(
+        const matched_pass = await bycrpt.compare(
           data.old_password,
           old_user_info.password,
         );
         if (!matched_pass) {
-          throw new UnauthorizedException('Invalid email or password');
+          throw new UnauthorizedException('Current password is incorrect');
         }
         const hashed_pass = await bycrpt.hash(
           data.new_password,
@@ -180,43 +202,6 @@ export class UsersService {
     });
 
     return UsersMapper.toResponseUpdateUserDto(updated_user_info);
-  }
-
-  async forgotPassword(data: {
-    email: string;
-  }): Promise<ResponseForgotPasswordDto> {
-    const user = await this.prisma.user.findUnique({
-      where: { email: data.email },
-    });
-    if (user === null) throw new UnauthorizedException('Invalid email');
-    const code = VerificationHelper.generateCode(this.codeDigits);
-
-    const expired_at = new Date();
-    expired_at.setMinutes(expired_at.getMinutes() + this.expiryMinute);
-
-    const verificationCode = await this.prisma.verificationCode.create({
-      data: {
-        code,
-        purpose: 'PASSWORD_RESET',
-        expired_at,
-        user_id: user.id,
-      },
-    });
-
-    const emailSendResponse = await this.emailService.sendResetPasswordCode(
-      data.email,
-      code,
-      user.full_name,
-    );
-
-    if (!emailSendResponse) {
-      throw new BadRequestException('Fail to send verification code via email');
-    }
-
-    return UsersMapper.toResponseForgotPasswordDto(
-      verificationCode,
-      emailSendResponse,
-    );
   }
 
   async resetPassword(data: {

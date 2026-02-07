@@ -12,7 +12,12 @@ import {
   NotFoundException,
   Res,
   StreamableFile,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import type { Response } from 'express';
 import { createReadStream } from 'fs';
 import { LoaisService } from './loais.service';
@@ -69,7 +74,7 @@ export class LoaisController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<StreamableFile> {
     const result = await this.loaisService.getImageByIndex(id, index);
-    
+
     if (!result) {
       throw new NotFoundException('Image not found');
     }
@@ -83,7 +88,32 @@ export class LoaisController {
     return new StreamableFile(file);
   }
 
-  @Get(':ten_khoa_hoc')
+  @Post(':id/images/upload')
+  @UseInterceptors(FileInterceptor('image', {
+    storage: memoryStorage(),
+    limits: {
+      fileSize: 50 * 1024 * 1024, // 50MB max file size
+    },
+  }))
+  async uploadImage(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() file: { buffer: Buffer; originalname: string; mimetype: string },
+  ) {
+    if (!file) {
+      throw new BadRequestException('No image file provided');
+    }
+    return this.loaisService.uploadPreviewImage(id, file);
+  }
+
+  @Delete(':id/images/:index')
+  async deleteImage(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('index', ParseIntPipe) index: number,
+  ) {
+    return this.loaisService.deletePreviewImage(id, index);
+  }
+
+  @Get('by-name/:ten_khoa_hoc')
   async findByTen(@Param('ten_khoa_hoc') ten_khoa_hoc: string) {
     const loai = await this.loaisService.findByTenKhoaHoc(ten_khoa_hoc);
     if (!loai) throw new NotFoundException('Loai not found');

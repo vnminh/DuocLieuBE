@@ -261,6 +261,18 @@ export class VungPhanBoService {
             vi_do: true,
           },
         },
+        ho: {
+          select: {
+            ten_khoa_hoc: true,
+            ten_tieng_viet: true,
+            nganh: {
+              select: {
+                ten_khoa_hoc: true,
+                ten_tieng_viet: true,
+              },
+            },
+          },
+        },
         dac_diem_sinh_hoc: {
           select: {
             muc_do_quy_hiem: true,
@@ -292,6 +304,18 @@ export class VungPhanBoService {
             kinh_do: true,
             vi_do: true,
             id_vung_phan_bo: true,
+          },
+        },
+        ho: {
+          select: {
+            ten_khoa_hoc: true,
+            ten_tieng_viet: true,
+            nganh: {
+              select: {
+                ten_khoa_hoc: true,
+                ten_tieng_viet: true,
+              },
+            },
           },
         },
         dac_diem_sinh_hoc: {

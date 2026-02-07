@@ -7,6 +7,7 @@ import {
   ResponseAllUserDto,
   ResponseCreateUserDto,
   ResponseForgotPasswordDto,
+  ResponseGetUserDto,
   ResponseLoginDto,
   ResponseVerifyCodeDto,
   ResponseCreateManyUserDto,
@@ -14,6 +15,16 @@ import {
 } from '../dto/response-user.dto';
 import { CreateEmailResponseSuccess } from 'resend';
 export class UsersMapper {
+  static toResponseGetUserDto(
+    data: User,
+    message: string = 'User fetched successfully',
+  ): ResponseGetUserDto {
+    return {
+      message,
+      data,
+    };
+  }
+
   static toResponseCreateUserDto(
     data: User,
     message: string = 'User được tạo mới thành công',

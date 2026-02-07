@@ -46,6 +46,11 @@ export class ResponseAllUserDto {
   };
 }
 
+export class ResponseGetUserDto {
+  message: string;
+  data: User;
+}
+
 export class ResponseCreateManyUserDto {
   message: string;
   data: User[];

@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Inject,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Post,
@@ -37,14 +38,14 @@ export class UsersController {
     return this.usersService.createMany(createManyUserDto.data);
   }
 
+  @Post('signup')
+  async signup(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
+  }
+
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
     return this.usersService.login(loginDto);
-  }
-
-  @Post('forgot-password')
-  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
-    return this.usersService.forgotPassword(forgotPasswordDto);
   }
 
   @Post('reset-password')
@@ -55,6 +56,13 @@ export class UsersController {
   @Post('verify-code')
   async verifyCode(@Body() verifyCodeDto: VerifyCodeDto) {
     return this.usersService.verifyCode(verifyCodeDto);
+  }
+
+  @Get('user/:id')
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    const user = await this.usersService.findOneById(id);
+    if (!user) throw new NotFoundException('User not found');
+    return user;
   }
 
   @Put('user/:id')

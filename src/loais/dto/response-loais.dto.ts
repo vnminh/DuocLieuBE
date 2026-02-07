@@ -65,3 +65,19 @@ export class ResponseImageCountDto {
     collection_uri: string;
   };
 }
+
+export class ResponseImageUploadDto {
+  message: string;
+  data: {
+    index: number;
+    count: number;
+  };
+}
+
+export class ResponseImageDeleteDto {
+  message: string;
+  data: {
+    deletedIndex: number;
+    count: number;
+  };
+}

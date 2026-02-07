@@ -83,6 +83,10 @@ export class CreateLoaiWithDetailsDto {
   @IsOptional()
   @IsString()
   collection_uri?: string;
+  @IsOptional()
+  @IsInt()
+  @Transform(({ value }) => (value !== undefined ? parseInt(value) : undefined))
+  so_luong_anh_preview?: number;
 
   // Cong_dung_va_thanh_phan_hoa_hoc fields (can have multiple)
   @IsArray()
@@ -130,21 +134,6 @@ export class CreateLoaiWithDetailsDto {
   })
   @IsString({ each: true })
   bai_thuoc?: string[];
-  @IsArray()
-  @Transform(({ value }) => {
-    if (Array.isArray(value)) {
-      return value.map((v) => String(v).trim());
-    }
-    if (typeof value === 'string') {
-      return value
-        .split(';')
-        .map((v) => v.trim())
-        .filter((v) => v.length > 0);
-    }
-    return [];
-  })
-  @IsString({ each: true })
-  tac_dung_duoc_ly?: string[];
 
   // Vi_tri_dia_li fields (can have multiple)
   @IsArray()
@@ -232,10 +221,14 @@ export class UpdateLoaiWithDetailsDto {
   @IsString()
   ky_thuat_trong_cham_soc_thu_hoach?: string;
 
-  // Hinh_anh 
+  // Hinh_anh
   @IsOptional()
   @IsString()
   collection_uri?: string;
+  @IsOptional()
+  @IsInt()
+  @Transform(({ value }) => (value !== undefined ? parseInt(value) : undefined))
+  so_luong_anh_preview?: number;
 
   // Cong_dung_va_thanh_phan_hoa_hoc  (can have multiple)
   @IsOptional()
@@ -286,22 +279,6 @@ export class UpdateLoaiWithDetailsDto {
   })
   @IsString({ each: true })
   bai_thuoc?: string[];
-  @IsOptional()
-  @IsArray()
-  @Transform(({ value }) => {
-    if (Array.isArray(value)) {
-      return value.map((v) => String(v).trim());
-    }
-    if (typeof value === 'string') {
-      return value
-        .split(';')
-        .map((v) => v.trim())
-        .filter((v) => v.length > 0);
-    }
-    return [];
-  })
-  @IsString({ each: true })
-  tac_dung_duoc_ly?: string[];
 
   // Vi_tri_dia_li (can have multiple)
   @IsOptional()

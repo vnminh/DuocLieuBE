@@ -32,10 +32,10 @@ export class VungPhanBoController {
     return this.vungPhanBoService.getMapData();
   }
 
-  @Get('all-loais-with-coordinates')
-  async getAllLoaisWithCoordinates() {
-    return this.vungPhanBoService.getAllLoaisWithCoordinates();
-  }
+  // @Get('all-loais-with-coordinates')
+  // async getAllLoaisWithCoordinates() {
+  //   return this.vungPhanBoService.getAllLoaisWithCoordinates();
+  // }
 
   @Get(':id/loais-with-coordinates')
   async getLoaisWithCoordinates(@Param('id', ParseIntPipe) id: number) {

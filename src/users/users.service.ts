@@ -219,6 +219,18 @@ export class UsersService {
     const newPassword = VerificationHelper.generateRandomPassword(12);
     const hashedPassword = await bycrpt.hash(newPassword, this.saltOrRound);
 
+    
+    // Send email with new password
+    const emailSendResponse = await this.emailService.sendNewPassword(
+      data.email,
+      newPassword,
+      user.full_name,
+    );
+    
+    if (!emailSendResponse) {
+      throw new BadRequestException('Failed to send new password via email');
+    }
+    
     // Update user password in database
     await this.prisma.user.update({
       data: {
@@ -227,18 +239,7 @@ export class UsersService {
       },
       where: { id: user.id },
     });
-
-    // Send email with new password
-    const emailSendResponse = await this.emailService.sendNewPassword(
-      data.email,
-      newPassword,
-      user.full_name,
-    );
-
-    if (!emailSendResponse) {
-      throw new BadRequestException('Failed to send new password via email');
-    }
-
+    
     return UsersMapper.toResponseResetPasswordDto(data.email, true);
   }
 

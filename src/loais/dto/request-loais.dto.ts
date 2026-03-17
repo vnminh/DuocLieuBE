@@ -89,6 +89,7 @@ export class CreateLoaiWithDetailsDto {
   so_luong_anh_preview?: number;
 
   // Cong_dung_va_thanh_phan_hoa_hoc fields (can have multiple)
+  @IsOptional()
   @IsArray()
   @Transform(({ value }) => {
     if (Array.isArray(value)) {
@@ -102,8 +103,10 @@ export class CreateLoaiWithDetailsDto {
     }
     return [];
   })
+  @IsOptional()
   @IsString({ each: true })
   bo_phan_su_dung?: string[];
+  @IsOptional()
   @IsArray()
   @Transform(({ value }) => {
     if (Array.isArray(value)) {
@@ -117,8 +120,10 @@ export class CreateLoaiWithDetailsDto {
     }
     return [];
   })
+  @IsOptional()
   @IsString({ each: true })
   cong_dung?: string[];
+  @IsOptional()
   @IsArray()
   @Transform(({ value }) => {
     if (Array.isArray(value)) {
@@ -132,6 +137,7 @@ export class CreateLoaiWithDetailsDto {
     }
     return [];
   })
+  @IsOptional()
   @IsString({ each: true })
   bai_thuoc?: string[];
 

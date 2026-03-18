@@ -4,3 +4,4 @@ coverage
 .git
 .gitignore
 npm-debug.log
+upload/**
